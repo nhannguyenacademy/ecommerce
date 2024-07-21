@@ -1,3 +1,4 @@
 .idea
 vendor
-ecommerce
+cmd/ecommerce/ecommerce
+main
