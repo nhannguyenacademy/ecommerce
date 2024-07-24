@@ -116,7 +116,7 @@ dev-docker:
 # ==============================================================================
 # Building containers
 
-build: ecommerce metrics
+build: ecommerce
 
 ecommerce:
 	docker build \
@@ -126,13 +126,13 @@ ecommerce:
 		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		.
 
-metrics:
-	docker build \
-		-f zarf/docker/dockerfile.metrics \
-		-t $(METRICS_IMAGE) \
-		--build-arg BUILD_REF=$(VERSION) \
-		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
-		.
+#metrics:
+#	docker build \
+#		-f zarf/docker/dockerfile.metrics \
+#		-t $(METRICS_IMAGE) \
+#		--build-arg BUILD_REF=$(VERSION) \
+#		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+#		.
 
 # ==============================================================================
 # Docker Compose
