@@ -18,7 +18,7 @@ services:
       start_period: 30s
     cpu_count: 2
     networks:
-      sales-system-network:
+      ecommerce-system-network:
         ipv4_address: 10.5.0.2
 
 #  init-migrate-seed:
@@ -28,10 +28,10 @@ services:
 #    restart: unless-stopped
 #    entrypoint: ['./admin', 'migrate-seed']
 #    environment:
-#      - SALES_DB_USER=postgres
-#      - SALES_DB_PASSWORD=postgres
-#      - SALES_DB_HOST=database
-#      - SALES_DB_DISABLE_TLS=true
+#      - ECOMMERCE_DB_USER=postgres
+#      - ECOMMERCE_DB_PASSWORD=postgres
+#      - ECOMMERCE_DB_HOST=database
+#      - ECOMMERCE_DB_DISABLE_TLS=true
 #    networks:
 #      ecommerce-system-network:
 #        ipv4_address: 10.5.0.10
@@ -53,11 +53,11 @@ services:
 #      - GOMAXPROCS
 #      - GOGC=off
 #      - GOMEMLIMIT
-#      - SALES_DB_USER=postgres
-#      - SALES_DB_PASSWORD=postgres
-#      - SALES_DB_HOST=database
-#      - SALES_DB_DISABLE_TLS=true
-#      - SALES_AUTH_HOST=http://auth:6000
+#      - ECOMMERCE_DB_USER=postgres
+#      - ECOMMERCE_DB_PASSWORD=postgres
+#      - ECOMMERCE_DB_HOST=database
+#      - ECOMMERCE_DB_DISABLE_TLS=true
+#      - ECOMMERCE_AUTH_HOST=http://auth:6000
 #      - KUBERNETES_NAMESPACE
 #      - KUBERNETES_NAME
 #      - KUBERNETES_POD_IP
@@ -91,7 +91,7 @@ services:
 #      ecommerce-system-network:
 #        ipv4_address: 10.5.0.20
 #    depends_on:
-#      - sales
+#      - ecommerce
 
 volumes:
   database: {}

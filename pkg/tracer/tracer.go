@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ardanlabs/service/foundation/logger"
+	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"

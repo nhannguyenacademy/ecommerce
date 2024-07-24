@@ -103,14 +103,14 @@ dev-brew:
 	brew list watch || brew install watch
 
 dev-docker:
-	docker pull $(GOLANG) & \
-	docker pull $(ALPINE) & \
 	docker pull $(POSTGRES) & \
-	docker pull $(GRAFANA) & \
-	docker pull $(PROMETHEUS) & \
-	docker pull $(TEMPO) & \
-	docker pull $(LOKI) & \
-	docker pull $(PROMTAIL) & \
+#	docker pull $(GOLANG) & \
+#	docker pull $(ALPINE) & \
+#	docker pull $(GRAFANA) & \
+#	docker pull $(PROMETHEUS) & \
+#	docker pull $(TEMPO) & \
+#	docker pull $(LOKI) & \
+#	docker pull $(PROMTAIL) & \
 	wait;
 
 # ==============================================================================
@@ -120,8 +120,8 @@ build: ecommerce metrics
 
 ecommerce:
 	docker build \
-		-f zarf/docker/dockerfile.sales \
-		-t $(SALES_IMAGE) \
+		-f zarf/docker/dockerfile.ecommerce \
+		-t $(ECOMMERCE_IMAGE) \
 		--build-arg BUILD_REF=$(VERSION) \
 		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		.
@@ -151,11 +151,16 @@ compose-logs:
 # ==============================================================================
 # Administration
 
+create-migration:
+	migrate create -ext sql -dir internal/sdk/migrate/migrations -seq $(name)
 migrate:
-	export ECOMMERCE_DB_HOST=localhost; go run api/cmd/admin/main.go migrate
+	export ECOMMERCE_DB_HOST=localhost; go run cmd/admin/main.go migrate
+
+migrate-down:
+	export ECOMMERCE_DB_HOST=localhost; go run cmd/admin/main.go migrate-down
 
 seed: migrate
-	export ECOMMERCE_DB_HOST=localhost; go run api/cmd/admin/main.go seed
+	export ECOMMERCE_DB_HOST=localhost; go run cmd/admin/main.go seed
 
 pgcli:
 	pgcli postgresql://postgres:postgres@localhost
@@ -167,7 +172,7 @@ readiness:
 	curl -il http://localhost:3000/v1/readiness
 
 token-gen:
-	export ECOMMERCE_DB_HOST=localhost; go run api/cmd/admin/main.go gentoken 5cf37266-3473-4006-984f-9325122678b7 54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+	export ECOMMERCE_DB_HOST=localhost; go run cmd/admin/main.go gentoken 5cf37266-3473-4006-984f-9325122678b7 54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
 # ==============================================================================
 # Metrics and Tracing

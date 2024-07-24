@@ -1,7 +1,7 @@
 package tracer
 
 import (
-	"github.com/ardanlabs/service/foundation/logger"
+	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
