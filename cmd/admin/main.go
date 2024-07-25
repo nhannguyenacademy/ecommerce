@@ -10,7 +10,7 @@ import (
 
 	"github.com/ardanlabs/conf/v3"
 	"github.com/nhannguyenacademy/ecommerce/cmd/admin/commands"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sqldb"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
 
@@ -110,20 +110,20 @@ func processCommands(args conf.Args, log *logger.Logger, cfg config) error {
 			return fmt.Errorf("seeding database: %w", err)
 		}
 
-	//case "useradd":
-	//	name := args.Num(1)
-	//	email := args.Num(2)
-	//	password := args.Num(3)
-	//	if err := commands.UserAdd(log, dbConfig, name, email, password); err != nil {
-	//		return fmt.Errorf("adding user: %w", err)
-	//	}
+	case "useradd":
+		name := args.Num(1)
+		email := args.Num(2)
+		password := args.Num(3)
+		if err := commands.UserAdd(log, dbConfig, name, email, password); err != nil {
+			return fmt.Errorf("adding user: %w", err)
+		}
 
-	//case "users":
-	//	pageNumber := args.Num(1)
-	//	rowsPerPage := args.Num(2)
-	//	if err := commands.Users(log, dbConfig, pageNumber, rowsPerPage); err != nil {
-	//		return fmt.Errorf("getting users: %w", err)
-	//	}
+	case "users":
+		pageNumber := args.Num(1)
+		rowsPerPage := args.Num(2)
+		if err := commands.Users(log, dbConfig, pageNumber, rowsPerPage); err != nil {
+			return fmt.Errorf("getting users: %w", err)
+		}
 
 	case "genkey":
 		if err := commands.GenKey(); err != nil {

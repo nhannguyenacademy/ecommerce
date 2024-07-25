@@ -3,8 +3,8 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdk/migrate"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sqldb"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/migrate"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"time"
 )
 

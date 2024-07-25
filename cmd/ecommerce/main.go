@@ -6,7 +6,11 @@ import (
 	"fmt"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/gin-gonic/gin"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sqldb"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
+	"github.com/nhannguyenacademy/ecommerce/internal/user/userapp"
+	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/user/userstore/usercache"
+	"github.com/nhannguyenacademy/ecommerce/internal/user/userstore/userdb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"net/http"
 	"os"
@@ -16,7 +20,10 @@ import (
 	"time"
 )
 
-const ProductionBuild = "production"
+const (
+	ProductionBuild = "production"
+	APIVersion      = "v1"
+)
 
 var build = "develop"
 
@@ -144,12 +151,24 @@ func run(ctx context.Context, log *logger.Logger) error {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	userBus := userbus.NewBusiness(
+		log,
+		usercache.NewStore(
+			log,
+			userdb.NewStore(log, db),
+			time.Hour,
+		),
+	)
 	ginEngine := gin.New()
-	// todo: add middlewares, routes
-	// e.GET("/metrics", gin.WrapH(promhttp.Handler()))
-	// e.Use(monitor.DefaultGin()...)
-	// s.module.abc.API().Route(e)
-	// s.module.def.API().Route(e.Group("/def"))
+	// todo:
+	// - cors
+	// - tracing
+	// - metrics
+	v1Router := ginEngine.Group("v1")
+	userapp.Routes(v1Router, userapp.Config{
+		Log:     log,
+		UserBus: userBus,
+	})
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
@@ -175,6 +194,14 @@ func run(ctx context.Context, log *logger.Logger) error {
 	case sig := <-shutdown:
 		log.Info(ctx, "shutdown", "status", "shutdown started", "signal", sig)
 		defer log.Info(ctx, "shutdown", "status", "shutdown complete", "signal", sig)
+
+		ctx, cancel := context.WithTimeout(ctx, cfg.Web.ShutdownTimeout)
+		defer cancel()
+
+		if err := api.Shutdown(ctx); err != nil {
+			api.Close()
+			return fmt.Errorf("could not stop server gracefully: %w", err)
+		}
 	}
 
 	return nil

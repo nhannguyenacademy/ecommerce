@@ -8,8 +8,8 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - ./database-data:/var/lib/postgresql/data
-      - ./pg_hba.conf:/etc/pg_hba.conf
-    command: [ '-c', 'hba_file=/etc/pg_hba.conf' ]
+#      - ./pg_hba.conf:/etc/pg_hba.conf # https://github.com/ardanlabs/service/pull/285
+#    command: [ '-c', 'hba_file=/etc/pg_hba.conf' ]
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -h localhost -U postgres" ]
       interval: 10s
