@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/gin-gonic/gin"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userapp"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
@@ -61,6 +62,7 @@ type config struct {
 }
 
 func main() {
+	// todo: implement this
 	traceIDFn := func(ctx context.Context) string {
 		return ""
 	}
@@ -160,6 +162,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// - tracing
 	// - metrics
 	v1Router := ginEngine.Group(v1)
+	v1Router.Use(mid.Logging(log))
 	userapp.Routes(v1Router, userapp.Config{
 		Log:     log,
 		UserBus: userBus,

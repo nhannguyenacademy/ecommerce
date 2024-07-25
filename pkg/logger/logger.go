@@ -16,6 +16,8 @@ import (
 	"log/slog"
 )
 
+const badKey = "!BADKEY"
+
 // TraceIDFn represents a function that can return the trace id from
 // the specified context.
 type TraceIDFn func(ctx context.Context) string
@@ -47,50 +49,65 @@ func NewStdLogger(logger *Logger, level Level) *log.Logger {
 	return slog.NewLogLogger(logger.handler, slog.Level(level))
 }
 
+func (l *Logger) With(args map[string]any) *Logger {
+	if len(args) == 0 {
+		return l
+	}
+
+	var attrs []slog.Attr
+	for k, v := range args {
+		attrs = append(attrs, slog.Any(k, v))
+	}
+
+	c := l.clone()
+	c.handler = l.handler.WithAttrs(attrs)
+	return c
+}
+
 // Debug logs at LevelDebug with the given context.
-func (log *Logger) Debug(ctx context.Context, msg string, args ...any) {
-	log.write(ctx, LevelDebug, 3, msg, args...)
+func (l *Logger) Debug(ctx context.Context, msg string, args ...any) {
+	l.write(ctx, LevelDebug, 3, msg, args...)
 }
 
 // Debugc logs the information at the specified call stack position.
-func (log *Logger) Debugc(ctx context.Context, caller int, msg string, args ...any) {
-	log.write(ctx, LevelDebug, caller, msg, args...)
+func (l *Logger) Debugc(ctx context.Context, caller int, msg string, args ...any) {
+	l.write(ctx, LevelDebug, caller, msg, args...)
 }
 
 // Info logs at LevelInfo with the given context.
-func (log *Logger) Info(ctx context.Context, msg string, args ...any) {
-	log.write(ctx, LevelInfo, 3, msg, args...)
+func (l *Logger) Info(ctx context.Context, msg string, args ...any) {
+	l.write(ctx, LevelInfo, 3, msg, args...)
 }
 
 // Infoc logs the information at the specified call stack position.
-func (log *Logger) Infoc(ctx context.Context, caller int, msg string, args ...any) {
-	log.write(ctx, LevelInfo, caller, msg, args...)
+func (l *Logger) Infoc(ctx context.Context, caller int, msg string, args ...any) {
+	l.write(ctx, LevelInfo, caller, msg, args...)
 }
 
 // Warn logs at LevelWarn with the given context.
-func (log *Logger) Warn(ctx context.Context, msg string, args ...any) {
-	log.write(ctx, LevelWarn, 3, msg, args...)
+func (l *Logger) Warn(ctx context.Context, msg string, args ...any) {
+	l.write(ctx, LevelWarn, 3, msg, args...)
 }
 
 // Warnc logs the information at the specified call stack position.
-func (log *Logger) Warnc(ctx context.Context, caller int, msg string, args ...any) {
-	log.write(ctx, LevelWarn, caller, msg, args...)
+func (l *Logger) Warnc(ctx context.Context, caller int, msg string, args ...any) {
+	l.write(ctx, LevelWarn, caller, msg, args...)
 }
 
 // Error logs at LevelError with the given context.
-func (log *Logger) Error(ctx context.Context, msg string, args ...any) {
-	log.write(ctx, LevelError, 3, msg, args...)
+func (l *Logger) Error(ctx context.Context, msg string, args ...any) {
+	l.write(ctx, LevelError, 3, msg, args...)
 }
 
 // Errorc logs the information at the specified call stack position.
-func (log *Logger) Errorc(ctx context.Context, caller int, msg string, args ...any) {
-	log.write(ctx, LevelError, caller, msg, args...)
+func (l *Logger) Errorc(ctx context.Context, caller int, msg string, args ...any) {
+	l.write(ctx, LevelError, caller, msg, args...)
 }
 
-func (log *Logger) write(ctx context.Context, level Level, caller int, msg string, args ...any) {
+func (l *Logger) write(ctx context.Context, level Level, caller int, msg string, args ...any) {
 	slogLevel := slog.Level(level)
 
-	if !log.handler.Enabled(ctx, slogLevel) {
+	if !l.handler.Enabled(ctx, slogLevel) {
 		return
 	}
 
@@ -99,12 +116,12 @@ func (log *Logger) write(ctx context.Context, level Level, caller int, msg strin
 
 	r := slog.NewRecord(time.Now(), slogLevel, msg, pcs[0])
 
-	if log.traceIDFn != nil {
-		args = append(args, "trace_id", log.traceIDFn(ctx))
+	if l.traceIDFn != nil {
+		args = append(args, "trace_id", l.traceIDFn(ctx))
 	}
 	r.Add(args...)
 
-	log.handler.Handle(ctx, r)
+	l.handler.Handle(ctx, r)
 }
 
 func new(w io.Writer, minLevel Level, serviceName string, traceIDFn TraceIDFn, events Events) *Logger {
@@ -143,4 +160,9 @@ func new(w io.Writer, minLevel Level, serviceName string, traceIDFn TraceIDFn, e
 		handler:   handler,
 		traceIDFn: traceIDFn,
 	}
+}
+
+func (l *Logger) clone() *Logger {
+	c := *l
+	return &c
 }

@@ -23,7 +23,7 @@ func Routes(r gin.IRouter, cfg Config) {
 		results, err := app.query(c.Request.Context(), parseQueryParams(c.Request))
 		if err != nil {
 			appErr := errs.NewError(err)
-			c.AbortWithStatusJSON(appErr.HTTPStatus(), appErr)
+			c.AbortWithError(appErr.HTTPStatus(), appErr)
 			return
 		}
 		c.JSON(http.StatusOK, results)
