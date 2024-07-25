@@ -21,25 +21,51 @@ import (
 )
 
 const (
-	ProductionBuild = "production"
-	APIVersion      = "v1"
+	productionBuild = "production"
+	v1              = "v1"
 )
 
 var build = "develop"
 
-func main() {
-	var log *logger.Logger
-	events := logger.Events{
-		Error: func(ctx context.Context, r logger.Record) {
-			log.Info(ctx, "******* SEND ALERT *******")
-		},
+type config struct {
+	conf.Version
+	Web struct {
+		ReadTimeout        time.Duration `conf:"default:5s"`
+		WriteTimeout       time.Duration `conf:"default:10s"`
+		IdleTimeout        time.Duration `conf:"default:120s"`
+		ShutdownTimeout    time.Duration `conf:"default:20s"`
+		APIHost            string        `conf:"default:0.0.0.0:3000"`
+		DebugHost          string        `conf:"default:0.0.0.0:3010"`
+		CORSAllowedOrigins []string      `conf:"default:*"`
 	}
+	Auth struct {
+		Host string `conf:"default:http://auth-service:6000"`
+	}
+	DB struct {
+		User         string `conf:"default:postgres"`
+		Password     string `conf:"default:postgres,mask"`
+		Host         string `conf:"default:database-service"`
+		Name         string `conf:"default:postgres"`
+		MaxIdleConns int    `conf:"default:0"`
+		MaxOpenConns int    `conf:"default:0"`
+		DisableTLS   bool   `conf:"default:true"`
+	}
+	Tempo struct {
+		Host        string  `conf:"default:tempo:4317"`
+		ServiceName string  `conf:"default:ecommerce"`
+		Probability float64 `conf:"default:0.05"`
+		// Shouldn't use a high Probability value in non-developer systems.
+		// 0.05 should be enough for most systems. Some might want to have
+		// this even lower.
+	}
+}
 
+func main() {
 	traceIDFn := func(ctx context.Context) string {
 		return ""
 	}
 
-	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "ecommerce", traceIDFn, events)
+	log := logger.New(os.Stdout, logger.LevelInfo, "ecommerce", traceIDFn)
 
 	// -------------------------------------------------------------------------
 
@@ -59,38 +85,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// Configuration
 
-	cfg := struct {
-		conf.Version
-		Web struct {
-			ReadTimeout        time.Duration `conf:"default:5s"`
-			WriteTimeout       time.Duration `conf:"default:10s"`
-			IdleTimeout        time.Duration `conf:"default:120s"`
-			ShutdownTimeout    time.Duration `conf:"default:20s"`
-			APIHost            string        `conf:"default:0.0.0.0:3000"`
-			DebugHost          string        `conf:"default:0.0.0.0:3010"`
-			CORSAllowedOrigins []string      `conf:"default:*"`
-		}
-		Auth struct {
-			Host string `conf:"default:http://auth-service:6000"`
-		}
-		DB struct {
-			User         string `conf:"default:postgres"`
-			Password     string `conf:"default:postgres,mask"`
-			Host         string `conf:"default:database-service"`
-			Name         string `conf:"default:postgres"`
-			MaxIdleConns int    `conf:"default:0"`
-			MaxOpenConns int    `conf:"default:0"`
-			DisableTLS   bool   `conf:"default:true"`
-		}
-		Tempo struct {
-			Host        string  `conf:"default:tempo:4317"`
-			ServiceName string  `conf:"default:ecommerce"`
-			Probability float64 `conf:"default:0.05"`
-			// Shouldn't use a high Probability value in non-developer systems.
-			// 0.05 should be enough for most systems. Some might want to have
-			// this even lower.
-		}
-	}{
+	cfg := config{
 		Version: conf.Version{
 			Build: build,
 			Desc:  "Ecommerce",
@@ -147,7 +142,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
-	if build == ProductionBuild {
+	if build == productionBuild {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -164,7 +159,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// - cors
 	// - tracing
 	// - metrics
-	v1Router := ginEngine.Group("v1")
+	v1Router := ginEngine.Group(v1)
 	userapp.Routes(v1Router, userapp.Config{
 		Log:     log,
 		UserBus: userBus,
