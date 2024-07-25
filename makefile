@@ -40,33 +40,15 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 # ==============================================================================
 # Running Test
 #
-#	Running the tests is a good way to verify you have installed most of the
-#	dependencies properly.
-#
 #	$ make test
 
 # ==============================================================================
 # Running The Project
 #
-#	$ make build compose-up
+#	$ make compose-build-up
 #	$ make token
 #	$ export TOKEN=<token>
 #	$ make users
-#
-#	You can use `make dev-status` to look at the status of your KIND cluster.
-
-# ==============================================================================
-# NOTES
-#
-# RSA Keys
-# 	To generate a private/public key PEM file.
-# 	$ openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048
-# 	$ openssl rsa -pubout -in private.pem -out public.pem
-# 	$ ./admin genkey
-#
-# Testing Coverage
-# 	$ go test -coverprofile p.out
-# 	$ go tool cover -html p.out
 
 # ==============================================================================
 # Define dependencies
@@ -196,9 +178,6 @@ test-down:
 test-r:
 	CGO_ENABLED=1 go test -race -count=1 ./...
 
-test-only:
-	CGO_ENABLED=0 go test -count=1 ./...
-
 lint:
 	CGO_ENABLED=0 go vet ./...
 	staticcheck -checks=all ./...
@@ -206,9 +185,7 @@ lint:
 vuln-check:
 	govulncheck ./...
 
-test: test-only lint vuln-check
-
-test-race: test-r lint vuln-check
+test: test-r lint vuln-check
 
 # ==============================================================================
 # Hitting endpoints
