@@ -162,7 +162,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// - tracing
 	// - metrics
 	v1Router := ginEngine.Group(v1)
-	v1Router.Use(mid.Logging(log))
+	v1Router.Use(mid.Logging(log), mid.Panic())
 	userapp.Routes(v1Router, userapp.Config{
 		Log:     log,
 		UserBus: userBus,
