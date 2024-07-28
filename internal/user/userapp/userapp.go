@@ -3,6 +3,7 @@ package userapp
 
 import (
 	"context"
+	"errors"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/query"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
@@ -22,7 +23,7 @@ func NewApp(userBus *userbus.Business) *App {
 	}
 }
 
-// Query returns a list of users with paging.
+// query returns a list of users with paging.
 func (a *App) query(ctx context.Context, qp QueryParams) (query.Result[User], error) {
 	page, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
@@ -50,4 +51,22 @@ func (a *App) query(ctx context.Context, qp QueryParams) (query.Result[User], er
 	}
 
 	return query.NewResult(toAppUsers(usrs), total, page), nil
+}
+
+// create adds a new user to the system.
+func (a *App) create(ctx context.Context, app NewUser) (User, error) {
+	nc, err := toBusNewUser(app)
+	if err != nil {
+		return User{}, errs.New(errs.InvalidArgument, err)
+	}
+
+	usr, err := a.userBus.Create(ctx, nc)
+	if err != nil {
+		if errors.Is(err, userbus.ErrUniqueEmail) {
+			return User{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
+		}
+		return User{}, errs.Newf(errs.Internal, "create: usr[%+v]: %s", usr, err)
+	}
+
+	return toAppUser(usr), nil
 }

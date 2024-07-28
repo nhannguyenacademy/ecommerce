@@ -85,11 +85,11 @@ func toAppUsers(users []userbus.User) []User {
 
 // NewUser defines the data needed to add a new user.
 type NewUser struct {
-	Name            string   `json:"name" validate:"required"`
-	Email           string   `json:"email" validate:"required,email"`
-	Roles           []string `json:"roles" validate:"required"`
-	Password        string   `json:"password" validate:"required"`
-	PasswordConfirm string   `json:"passwordConfirm" validate:"eqfield=Password"`
+	Name            string   `json:"name" binding:"required"`
+	Email           string   `json:"email" binding:"required,email"`
+	Roles           []string `json:"roles" binding:"required"`
+	Password        string   `json:"password" binding:"required"`
+	PasswordConfirm string   `json:"passwordConfirm" binding:"eqfield=Password"`
 }
 
 // Decode implements the decoder interface.

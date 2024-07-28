@@ -206,7 +206,7 @@ create-user:
 	curl -il -X POST \
 	-H "Authorization: Bearer ${TOKEN}" \
 	-H 'Content-Type: application/json' \
-	-d '{"name":"bill","email":"b@gmail.com","roles":["ADMIN"],"password":"123","passwordConfirm":"123"}' \
+	-d '{"name":"Nhan","email":"n@email.com","roles":["ADMIN"],"password":"123","passwordConfirm":"123"}' \
 	http://localhost:3000/v1/users
 
 users:
