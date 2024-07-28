@@ -44,7 +44,11 @@ type Business struct {
 }
 
 // NewBusiness constructs a user business API for use.
-func NewBusiness(log *logger.Logger, storer Storer, delegate *delegate.Delegate) *Business {
+func NewBusiness(
+	log *logger.Logger,
+	delegate *delegate.Delegate,
+	storer Storer,
+) *Business {
 	return &Business{
 		log:      log,
 		storer:   storer,

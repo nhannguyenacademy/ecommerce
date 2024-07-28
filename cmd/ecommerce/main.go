@@ -7,6 +7,7 @@ import (
 	"github.com/ardanlabs/conf/v3"
 	"github.com/gin-gonic/gin"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/delegate"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userapp"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
@@ -148,8 +149,11 @@ func run(ctx context.Context, log *logger.Logger) error {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	delegate := delegate.New(log)
+
 	userBus := userbus.NewBusiness(
 		log,
+		delegate,
 		usercache.NewStore(
 			log,
 			userdb.NewStore(log, db),

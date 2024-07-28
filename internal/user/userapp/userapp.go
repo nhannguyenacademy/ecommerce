@@ -3,6 +3,7 @@ package userapp
 
 import (
 	"context"
+	"errors"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/query"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
@@ -24,6 +25,7 @@ func NewApp(userBus *userbus.Business) *App {
 
 // Query returns a list of users with paging.
 func (a *App) query(ctx context.Context, qp QueryParams) (query.Result[User], error) {
+	return query.Result[User]{}, errs.NewFieldsError("page", errors.New("not implemented"))
 	page, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
 		return query.Result[User]{}, errs.NewFieldsError("page", err)
