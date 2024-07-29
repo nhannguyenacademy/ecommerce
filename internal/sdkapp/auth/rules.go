@@ -2,27 +2,58 @@ package auth
 
 import (
 	_ "embed"
+	"fmt"
 )
 
-// These the current set of rules we have for auth.
-const (
-	RuleAuthenticate   = "auth"
-	RuleAny            = "rule_any"
-	RuleAdminOnly      = "rule_admin_only"
-	RuleUserOnly       = "rule_user_only"
-	RuleAdminOrSubject = "rule_admin_or_subject"
-)
+// Rule represents an authorize rule in the system.
+type Rule struct {
+	name string
+}
 
-// Package name of our rego code.
-const (
-	opaPackage string = "ardan.rego"
-)
+// Equal provides support for the go-cmp package and testing.
+func (r Rule) Equal(r2 Rule) bool {
+	return r.name == r2.name
+}
 
-// Core OPA policies.
-var (
-	//go:embed rego/authentication.rego
-	regoAuthentication string
+// Set of known rules.
+var rules = make(map[string]Rule)
 
-	//go:embed rego/authorization.rego
-	regoAuthorization string
-)
+func newRule(rule string) Rule {
+	r := Rule{rule}
+	rules[rule] = r
+	return r
+}
+
+type ruleSet struct {
+	Any            Rule
+	Admin          Rule
+	User           Rule
+	AdminOrSubject Rule
+}
+
+var Rules = ruleSet{
+	Any:            newRule("rule_any"),
+	Admin:          newRule("rule_admin_only"),
+	User:           newRule("rule_user_only"),
+	AdminOrSubject: newRule("rule_admin_or_subject"),
+}
+
+// =============================================================================
+
+func ParseRule(value string) (Rule, error) {
+	role, exists := rules[value]
+	if !exists {
+		return Rule{}, fmt.Errorf("invalid rule %q", value)
+	}
+
+	return role, nil
+}
+
+func MustParseRule(value string) Rule {
+	role, err := ParseRule(value)
+	if err != nil {
+		panic(err)
+	}
+
+	return role
+}

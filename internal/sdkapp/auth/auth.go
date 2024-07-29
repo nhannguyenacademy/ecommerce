@@ -17,7 +17,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/open-policy-agent/opa/rego"
 )
 
 // ErrForbidden is returned when a auth issue is identified.
@@ -149,45 +148,35 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 // Authorize attempts to authorize the user with the provided input roles, if
 // none of the input roles are within the user's claims, we return an error
 // otherwise the user is authorized.
-func (a *Auth) Authorize(ctx context.Context, claims Claims, userID uuid.UUID, rule string) error {
-	input := map[string]any{
-		"Roles":   claims.Roles,
-		"Subject": claims.Subject,
-		"UserID":  userID,
-	}
-
-	if err := a.opaPolicyEvaluation(ctx, regoAuthorization, rule, input); err != nil {
-		return fmt.Errorf("rego evaluation failed : %w", err)
-	}
-
-	return nil
-}
-
-// opaPolicyEvaluation asks opa to evaluate the token against the specified token
-// policy and public key.
-func (a *Auth) opaPolicyEvaluation(ctx context.Context, regoScript string, rule string, input any) error {
-	query := fmt.Sprintf("x = data.%s.%s", opaPackage, rule)
-
-	q, err := rego.New(
-		rego.Query(query),
-		rego.Module("policy.rego", regoScript),
-	).PrepareForEval(ctx)
+func (a *Auth) Authorize(_ context.Context, claims Claims, userID uuid.UUID, rule Rule) error {
+	var (
+		roles userbus.RolesList
+		err   error
+	)
+	roles, err = userbus.ParseRoles(claims.Roles)
 	if err != nil {
-		return err
+		return fmt.Errorf("parsing roles: %w", err)
 	}
 
-	results, err := q.Eval(ctx, rego.EvalInput(input))
-	if err != nil {
-		return fmt.Errorf("query: %w", err)
-	}
-
-	if len(results) == 0 {
-		return errors.New("no results")
-	}
-
-	result, ok := results[0].Bindings["x"].(bool)
-	if !ok || !result {
-		return fmt.Errorf("bindings results[%v] ok[%v]", results, ok)
+	switch rule {
+	case Rules.Any:
+		if !roles.Contains(userbus.Roles.Admin) && !roles.Contains(userbus.Roles.User) {
+			return fmt.Errorf("rule_any: %w", ErrForbidden)
+		}
+	case Rules.Admin:
+		if !roles.Contains(userbus.Roles.Admin) {
+			return fmt.Errorf("rule_admin_only: %w", ErrForbidden)
+		}
+	case Rules.User:
+		if !roles.Contains(userbus.Roles.User) {
+			return fmt.Errorf("rule_user_only: %w", ErrForbidden)
+		}
+	case Rules.AdminOrSubject:
+		if !roles.Contains(userbus.Roles.Admin) && claims.Subject != userID.String() {
+			return fmt.Errorf("rule_admin_or_subject: %w", ErrForbidden)
+		}
+	default:
+		return fmt.Errorf("unknown rule: %s", rule)
 	}
 
 	return nil

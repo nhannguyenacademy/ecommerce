@@ -8,7 +8,7 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
 
-func Authorize(l *logger.Logger, auth *auth.Auth, rule string) gin.HandlerFunc {
+func Authorize(l *logger.Logger, auth *auth.Auth, rule auth.Rule) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 		userID, err := GetUserID(ctx)

@@ -87,3 +87,15 @@ func ParseRoles(roles []string) ([]Role, error) {
 
 	return usrRoles, nil
 }
+
+type RolesList []Role
+
+func (r RolesList) Contains(role Role) bool {
+	for _, r := range r {
+		if r.Equal(role) {
+			return true
+		}
+	}
+
+	return false
+}

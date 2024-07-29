@@ -21,7 +21,7 @@ type Config struct {
 
 func Routes(r gin.IRouter, cfg Config) {
 	authen := mid.Authenticate(cfg.Log, cfg.Auth)
-	ruleAdmin := mid.Authorize(cfg.Log, cfg.Auth, auth.RuleAdminOnly)
+	ruleAdmin := mid.Authorize(cfg.Log, cfg.Auth, auth.Rules.Admin)
 
 	app := NewApp(cfg.UserBus)
 
