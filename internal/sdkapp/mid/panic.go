@@ -5,17 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/response"
+	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"runtime"
 )
 
-func Panic() gin.HandlerFunc {
+func Panic(l *logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if r := recover(); r != nil {
-				c.Error(errs.NewError(errors.New(fmt.Sprintf("panic: %+v - stack: %s", r, string(stack(3))))))
-				appErr := errs.New(errs.Internal, errors.New("internal server error"))
-				c.AbortWithStatusJSON(appErr.HTTPStatus(), appErr)
+				err := errors.New(fmt.Sprintf("panic: %+v - stack: %s", r, string(stack(3))))
+				response.Send(c, l, nil, err)
+				return
 			}
 		}()
 		c.Next()

@@ -1,6 +1,6 @@
 .idea
 vendor
 cmd/ecommerce/ecommerce
-cmd/admin/admin
+tools/admin/admin
 main
 deployments/compose/database-data

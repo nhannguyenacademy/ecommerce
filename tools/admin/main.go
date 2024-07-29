@@ -5,11 +5,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
+	"github.com/nhannguyenacademy/ecommerce/tools/admin/commands"
 	"io"
 	"os"
 
 	"github.com/ardanlabs/conf/v3"
-	"github.com/nhannguyenacademy/ecommerce/cmd/admin/commands"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
@@ -29,7 +30,7 @@ type config struct {
 		DisableTLS   bool   `conf:"default:true"`
 	}
 	Auth struct {
-		KeysFolder string `conf:"default:zarf/keys/"`
+		KeysFolder string `conf:"default:configs/keys/"`
 		DefaultKID string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
 	}
 }
@@ -130,18 +131,18 @@ func processCommands(args conf.Args, log *logger.Logger, cfg config) error {
 			return fmt.Errorf("key generation: %w", err)
 		}
 
-	//case "gentoken":
-	//	userID, err := uuid.Parse(args.Num(1))
-	//	if err != nil {
-	//		return fmt.Errorf("generating token: %w", err)
-	//	}
-	//	kid := args.Num(2)
-	//	if kid == "" {
-	//		kid = cfg.Auth.DefaultKID
-	//	}
-	//	if err := commands.GenToken(log, dbConfig, cfg.Auth.KeysFolder, userID, kid); err != nil {
-	//		return fmt.Errorf("generating token: %w", err)
-	//	}
+	case "gentoken":
+		userID, err := uuid.Parse(args.Num(1))
+		if err != nil {
+			return fmt.Errorf("generating token: %w", err)
+		}
+		kid := args.Num(2)
+		if kid == "" {
+			kid = cfg.Auth.DefaultKID
+		}
+		if err := commands.GenToken(log, dbConfig, cfg.Auth.KeysFolder, userID, kid); err != nil {
+			return fmt.Errorf("generating token: %w", err)
+		}
 
 	default:
 		fmt.Println("migrate:    create the schema in the database")

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/gin-gonic/gin"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/delegate"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
@@ -13,6 +14,7 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userstore/usercache"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userstore/userdb"
+	"github.com/nhannguyenacademy/ecommerce/pkg/keystore"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"net/http"
 	"os"
@@ -41,7 +43,9 @@ type config struct {
 		CORSAllowedOrigins []string      `conf:"default:*"`
 	}
 	Auth struct {
-		Host string `conf:"default:http://auth-service:6000"`
+		KeysFolder string `conf:"default:configs/keys/"`
+		ActiveKID  string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
+		Issuer     string `conf:"default:service project"`
 	}
 	DB struct {
 		User         string `conf:"default:postgres"`
@@ -151,6 +155,18 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	delegate := delegate.New(log)
 
+	ks := keystore.New()
+	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
+		return fmt.Errorf("reading keys: %w", err)
+	}
+
+	ath, err := auth.New(auth.Config{
+		Log:       log,
+		DB:        db,
+		KeyLookup: ks,
+		Issuer:    "ecommerce",
+	})
+
 	userBus := userbus.NewBusiness(
 		log,
 		delegate,
@@ -166,7 +182,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// - tracing
 	// - metrics
 	v1Router := ginEngine.Group(v1)
-	v1Router.Use(mid.Logging(log), mid.Panic())
+	v1Router.Use(mid.Logging(log), mid.Panic(log), mid.Authen(log, ath))
 	userapp.Routes(v1Router, userapp.Config{
 		Log:     log,
 		UserBus: userBus,
