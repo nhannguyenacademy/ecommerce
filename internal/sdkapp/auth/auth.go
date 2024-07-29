@@ -57,8 +57,7 @@ type Auth struct {
 
 // New creates an Auth to support authentication/authorization.
 func New(cfg Config) (*Auth, error) {
-	// If a database connection is not provided, we won't perform the
-	// user enabled check.
+	// If a database connection is not provided, we won't perform the user enabled check.
 	var userBus *userbus.Business
 	if cfg.DB != nil {
 		userBus = userbus.NewBusiness(cfg.Log, nil, usercache.NewStore(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB), 10*time.Minute))
@@ -109,10 +108,10 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 		return Claims{}, errors.New("expected authorization header format: Bearer <token>")
 	}
 
-	jwt := bearerToken[7:]
+	jwtTokenStr := bearerToken[7:]
 
 	var claims Claims
-	token, _, err := a.parser.ParseUnverified(jwt, &claims)
+	token, _, err := a.parser.ParseUnverified(jwtTokenStr, &claims)
 	if err != nil {
 		return Claims{}, fmt.Errorf("error parsing token: %w", err)
 	}
@@ -132,18 +131,14 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 		return Claims{}, fmt.Errorf("failed to fetch public key: %w", err)
 	}
 
-	input := map[string]any{
-		"Key":   pem,
-		"Token": jwt,
-		"ISS":   a.issuer,
-	}
-
-	if err := a.opaPolicyEvaluation(ctx, regoAuthentication, RuleAuthenticate, input); err != nil {
+	_, err = a.parser.Parse(jwtTokenStr, func(token *jwt.Token) (interface{}, error) {
+		return jwt.ParseRSAPublicKeyFromPEM([]byte(pem))
+	})
+	if err != nil {
 		return Claims{}, fmt.Errorf("authentication failed : %w", err)
 	}
 
 	// Check the database for this user to verify they are still enabled.
-
 	if err := a.isUserEnabled(ctx, claims); err != nil {
 		return Claims{}, fmt.Errorf("user not enabled : %w", err)
 	}
