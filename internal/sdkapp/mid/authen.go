@@ -9,7 +9,7 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
 
-func Authen(l *logger.Logger, auth *auth.Auth) gin.HandlerFunc {
+func Authenticate(l *logger.Logger, auth *auth.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 		claims, err := auth.Authenticate(ctx, c.GetHeader("Authorization"))
