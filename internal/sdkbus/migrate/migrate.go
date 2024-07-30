@@ -34,7 +34,7 @@ func Migrate(ctx context.Context, db *sqlx.DB) error {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://internal/sdk/migrate/migrations",
+		"file://internal/sdkbus/migrate/migrations",
 		"postgres-migrate-up", // for logging purposes only
 		driver,
 	)

@@ -50,7 +50,7 @@ type config struct {
 	DB struct {
 		User         string `conf:"default:postgres"`
 		Password     string `conf:"default:postgres,mask"`
-		Host         string `conf:"default:database-service"`
+		Host         string `conf:"default:database"`
 		Name         string `conf:"default:postgres"`
 		MaxIdleConns int    `conf:"default:0"`
 		MaxOpenConns int    `conf:"default:0"`
@@ -149,6 +149,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
+	// todo: update this
 	if build == productionBuild {
 		gin.SetMode(gin.ReleaseMode)
 	}

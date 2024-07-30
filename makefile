@@ -86,8 +86,8 @@ dev-brew:
 
 dev-docker:
 	docker pull $(POSTGRES) & \
-#	docker pull $(GOLANG) & \
-#	docker pull $(ALPINE) & \
+	docker pull $(GOLANG) & \
+	docker pull $(ALPINE) & \
 #	docker pull $(GRAFANA) & \
 #	docker pull $(PROMETHEUS) & \
 #	docker pull $(TEMPO) & \
@@ -98,23 +98,18 @@ dev-docker:
 # ==============================================================================
 # Building containers
 
+run:
+	export ECOMMERCE_DB_HOST=localhost; go run cmd/ecommerce/main.go
+
 build: ecommerce
 
 ecommerce:
 	docker build \
-		-f zarf/docker/dockerfile.ecommerce \
+		-f build/ecommerce/ecommerce.dockerfile \
 		-t $(ECOMMERCE_IMAGE) \
 		--build-arg BUILD_REF=$(VERSION) \
 		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		.
-
-#metrics:
-#	docker build \
-#		-f zarf/docker/dockerfile.metrics \
-#		-t $(METRICS_IMAGE) \
-#		--build-arg BUILD_REF=$(VERSION) \
-#		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
-#		.
 
 # ==============================================================================
 # Docker Compose
@@ -128,16 +123,14 @@ compose-down:
 	cd ./deployments/compose/ && docker compose -f docker_compose.yaml down
 
 compose-logs:
-	cd ./deployments/compose/ && docker compose -f docker_compose.yaml logs
+	cd ./deployments/compose/ && docker compose -f docker_compose.yaml logs --follow
 
 # ==============================================================================
 # Administration
 
-admin-users:
-	export ECOMMERCE_DB_HOST=localhost; go run tools/admin/main.go users
-
 create-migration:
-	migrate create -ext sql -dir internal/sdk/migrate/migrations -seq $(name)
+	migrate create -ext sql -dir internal/sdkbus/migrate/migrations -seq $(name)
+
 migrate:
 	export ECOMMERCE_DB_HOST=localhost; go run tools/admin/main.go migrate
 
@@ -147,16 +140,10 @@ migrate-down:
 seed: migrate
 	export ECOMMERCE_DB_HOST=localhost; go run tools/admin/main.go seed
 
-pgcli:
-	pgcli postgresql://postgres:postgres@localhost
+admin-users:
+	export ECOMMERCE_DB_HOST=localhost; go run tools/admin/main.go users
 
-liveness:
-	curl -il http://localhost:3000/v1/liveness
-
-readiness:
-	curl -il http://localhost:3000/v1/readiness
-
-token-gen:
+admin-gen-token:
 	export ECOMMERCE_DB_HOST=localhost; go run tools/admin/main.go gentoken 5cf37266-3473-4006-984f-9325122678b7 54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
 # ==============================================================================
@@ -164,9 +151,6 @@ token-gen:
 
 grafana:
 	open -a "Google Chrome" http://localhost:3100/
-
-statsviz:
-	open -a "Google Chrome" http://localhost:3010/debug/statsviz
 
 # ==============================================================================
 # Running tests within the local computer
@@ -190,10 +174,10 @@ test: test-r lint vuln-check
 # ==============================================================================
 # Hitting endpoints
 
-ready:
+readiness:
 	curl -il http://localhost:3000/v1/readiness
 
-live:
+liveness:
 	curl -il http://localhost:3000/v1/liveness
 
 token:
@@ -204,14 +188,14 @@ create-user:
 	curl -il -X POST \
 	-H "Authorization: Bearer ${TOKEN}" \
 	-H 'Content-Type: application/json' \
-	-d '{"name":"Nhan","email":"n@email.com","roles":["ADMIN"],"password":"123","passwordConfirm":"123"}' \
+	-d '{"name":"Nhan Nguyen","email":"nhannguyen@email.com","roles":["ADMIN"],"password":"test123","passwordConfirm":"test123"}' \
 	http://localhost:3000/v1/users
 
 users:
 	curl -il \
 	-H "Authorization: Bearer ${TOKEN}" "http://localhost:3000/v1/users?page=1&rows=2"
 
-users-timeout:
+users-timeout: # Timeout after 1 second
 	curl -il \
 	--max-time 1 \
 	-H "Authorization: Bearer ${TOKEN}" "http://localhost:3000/v1/users?page=1&rows=2"
@@ -244,9 +228,3 @@ deps-upgrade:
 	go get -u -v ./...
 	go mod tidy
 	go mod vendor
-
-deps-cleancache:
-	go clean -modcache
-
-list:
-	go list -mod=mod all
