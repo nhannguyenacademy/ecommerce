@@ -89,4 +89,6 @@ func Routes(r gin.IRouter, cfg Config) {
 		err := app.delete(c.Request.Context())
 		response.Send(c, cfg.Log, nil, err)
 	})
+
+	// todo: token api route
 }

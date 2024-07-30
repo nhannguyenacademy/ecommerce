@@ -19,7 +19,7 @@ import (
 type Store struct {
 	log    *logger.Logger
 	storer userbus.Storer
-	cache  *sturdyc.Client[userbus.User]
+	cache  *sturdyc.Client[userbus.User] // todo: using redis
 }
 
 // NewStore constructs the api for data and caching access.
