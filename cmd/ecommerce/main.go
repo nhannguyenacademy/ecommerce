@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/gin-gonic/gin"
+	"github.com/nhannguyenacademy/ecommerce/internal/check/checkapp"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/delegate"
@@ -184,6 +185,11 @@ func run(ctx context.Context, log *logger.Logger) error {
 		Log:     log,
 		UserBus: userBus,
 		Auth:    ath,
+	})
+	checkapp.Routes(v1Router, checkapp.Config{
+		Log:   log,
+		DB:    db,
+		Build: cfg.Build,
 	})
 
 	api := http.Server{
