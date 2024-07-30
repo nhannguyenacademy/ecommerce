@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/query"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
@@ -66,6 +67,16 @@ func (a *App) create(ctx context.Context, app NewUser) (User, error) {
 			return User{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
 		}
 		return User{}, errs.Newf(errs.Internal, "create: usr[%+v]: %s", usr, err)
+	}
+
+	return toAppUser(usr), nil
+}
+
+// queryByID returns a user by its Ia.
+func (a *App) queryByID(ctx context.Context) (User, error) {
+	usr, err := mid.GetUser(ctx)
+	if err != nil {
+		return User{}, errs.Newf(errs.Internal, "querybyid: %s", err)
 	}
 
 	return toAppUser(usr), nil

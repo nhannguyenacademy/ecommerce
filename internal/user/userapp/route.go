@@ -22,12 +22,18 @@ type Config struct {
 func Routes(r gin.IRouter, cfg Config) {
 	authen := mid.Authenticate(cfg.Log, cfg.Auth)
 	ruleAdmin := mid.Authorize(cfg.Log, cfg.Auth, auth.Rules.Admin)
+	ruleAuthorizeUser := mid.AuthorizeUser(cfg.Log, cfg.Auth, cfg.UserBus, auth.Rules.AdminOrSubject)
 
 	app := NewApp(cfg.UserBus)
 
 	r.GET("/users", authen, ruleAdmin, func(c *gin.Context) {
 		results, err := app.query(c.Request.Context(), parseQueryParams(c.Request))
 		response.Send(c, cfg.Log, results, err)
+	})
+
+	r.GET("/users/:user_id", authen, ruleAuthorizeUser, func(c *gin.Context) {
+		u, err := app.queryByID(c.Request.Context())
+		response.Send(c, cfg.Log, u, err)
 	})
 
 	r.POST("/users", authen, ruleAdmin, func(c *gin.Context) {
