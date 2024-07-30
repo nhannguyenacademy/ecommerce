@@ -81,3 +81,57 @@ func (a *App) queryByID(ctx context.Context) (User, error) {
 
 	return toAppUser(usr), nil
 }
+
+// updateRole updates an existing user's role.
+func (a *App) updateRole(ctx context.Context, app UpdateUserRole) (User, error) {
+	uu, err := toBusUpdateUserRole(app)
+	if err != nil {
+		return User{}, errs.New(errs.InvalidArgument, err)
+	}
+
+	usr, err := mid.GetUser(ctx)
+	if err != nil {
+		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
+	}
+
+	updUsr, err := a.userBus.Update(ctx, usr, uu)
+	if err != nil {
+		return User{}, errs.Newf(errs.Internal, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
+	}
+
+	return toAppUser(updUsr), nil
+}
+
+// update updates an existing user.
+func (a *App) update(ctx context.Context, app UpdateUser) (User, error) {
+	uu, err := toBusUpdateUser(app)
+	if err != nil {
+		return User{}, errs.New(errs.InvalidArgument, err)
+	}
+
+	usr, err := mid.GetUser(ctx)
+	if err != nil {
+		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
+	}
+
+	updUsr, err := a.userBus.Update(ctx, usr, uu)
+	if err != nil {
+		return User{}, errs.Newf(errs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
+	}
+
+	return toAppUser(updUsr), nil
+}
+
+// delete removes a user from the system.
+func (a *App) delete(ctx context.Context) error {
+	usr, err := mid.GetUser(ctx)
+	if err != nil {
+		return errs.Newf(errs.Internal, "userID missing in context: %s", err)
+	}
+
+	if err := a.userBus.Delete(ctx, usr); err != nil {
+		return errs.Newf(errs.Internal, "delete: userID[%s]: %s", usr.ID, err)
+	}
+
+	return nil
+}

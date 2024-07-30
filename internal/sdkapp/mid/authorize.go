@@ -36,8 +36,7 @@ func Authorize(l *logger.Logger, auth *auth.Auth, rule auth.Rule) gin.HandlerFun
 
 // AuthorizeUser executes the specified role and extracts the specified
 // user from the DB if a user id is specified in the call. Depending on the rule
-// specified, the userid from the claims may be compared with the specified
-// user id.
+// specified, the userid from the claims may be compared with the specified user id.
 func AuthorizeUser(l *logger.Logger, auth *auth.Auth, userBus *userbus.Business, rule auth.Rule) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
