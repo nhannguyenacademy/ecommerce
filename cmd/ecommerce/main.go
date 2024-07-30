@@ -25,8 +25,7 @@ import (
 )
 
 const (
-	productionBuild = "production"
-	v1              = "v1"
+	v1 = "v1"
 )
 
 var build = "develop"
@@ -149,11 +148,6 @@ func run(ctx context.Context, log *logger.Logger) error {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
-	// todo: update this
-	if build == productionBuild {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
 	delegate := delegate.New(log)
 
 	ks := keystore.New()
@@ -177,6 +171,8 @@ func run(ctx context.Context, log *logger.Logger) error {
 			time.Hour,
 		),
 	)
+
+	gin.SetMode(gin.ReleaseMode)
 	ginEngine := gin.New()
 	// todo:
 	// - cors
