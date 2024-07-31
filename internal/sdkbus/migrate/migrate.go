@@ -4,9 +4,11 @@ package migrate
 import (
 	"context"
 	"database/sql"
+	"embed"
 	_ "embed"
 	"errors"
 	"fmt"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -17,6 +19,9 @@ import (
 )
 
 var (
+	//go:embed migrations/*.sql
+	migrations embed.FS
+
 	//go:embed seeds/seed.sql
 	seedDoc string
 )
@@ -33,11 +38,12 @@ func Migrate(ctx context.Context, db *sqlx.DB) error {
 		return fmt.Errorf("construct postgres driver: %w", err)
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://internal/sdkbus/migrate/migrations",
-		"postgres-migrate-up", // for logging purposes only
-		driver,
-	)
+	d, err := iofs.New(migrations, "migrations")
+	if err != nil {
+		return fmt.Errorf("construct iofs driver: %w", err)
+	}
+
+	m, err := migrate.NewWithInstance("iofs", d, "postgres", driver)
 	if err != nil {
 		return fmt.Errorf("construct migrate instance: %w", err)
 	}
@@ -55,11 +61,12 @@ func MigrateDown(ctx context.Context, db *sqlx.DB) error {
 		return fmt.Errorf("construct postgres driver: %w", err)
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://internal/sdk/migrate/migrations",
-		"postgres-migrate-down", // for logging purposes only
-		driver,
-	)
+	d, err := iofs.New(migrations, "migrations")
+	if err != nil {
+		return fmt.Errorf("construct iofs driver: %w", err)
+	}
+
+	m, err := migrate.NewWithInstance("iofs", d, "postgres", driver)
 	if err != nil {
 		return fmt.Errorf("construct migrate instance: %w", err)
 	}

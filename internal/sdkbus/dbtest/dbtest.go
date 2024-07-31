@@ -121,11 +121,12 @@ func NewDatabase(t *testing.T, testName string) *Database {
 
 	// -------------------------------------------------------------------------
 
+	// todo: check "WITH (FORCE)" in drop db statement
 	t.Cleanup(func() {
 		t.Helper()
 
 		t.Logf("Drop Database: %s\n", dbName)
-		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName); err != nil {
+		if _, err := dbM.ExecContext(context.Background(), "DROP DATABASE "+dbName+" WITH (FORCE)"); err != nil {
 			t.Fatalf("dropping database %s: %v", dbName, err)
 		}
 

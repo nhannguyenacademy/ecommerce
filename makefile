@@ -137,7 +137,7 @@ migrate:
 migrate-down:
 	export ECOMMERCE_DB_HOST=localhost; go run tools/admin/main.go migrate-down
 
-seed: migrate
+seed:
 	export ECOMMERCE_DB_HOST=localhost; go run tools/admin/main.go seed
 
 admin-users:

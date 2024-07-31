@@ -2,17 +2,14 @@ package unitest
 
 import (
 	"context"
-
-	"github.com/ardanlabs/service/business/domain/homebus"
-	"github.com/ardanlabs/service/business/domain/productbus"
-	"github.com/ardanlabs/service/business/domain/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 )
 
 // User represents an app user specified for the test.
 type User struct {
 	userbus.User
-	Products []productbus.Product
-	Homes    []homebus.Home
+	//Products []productbus.Product
+	//Homes    []homebus.Home
 }
 
 // SeedData represents data that was seeded for the test.
