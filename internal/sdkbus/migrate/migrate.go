@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"embed"
-	_ "embed"
 	"errors"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4/source/iofs"

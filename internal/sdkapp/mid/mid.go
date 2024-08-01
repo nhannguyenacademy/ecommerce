@@ -1,3 +1,4 @@
+// Package mid is a package for common middleware functions.
 package mid
 
 import (

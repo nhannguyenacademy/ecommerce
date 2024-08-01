@@ -16,8 +16,6 @@ import (
 	"log/slog"
 )
 
-const badKey = "!BADKEY"
-
 // TraceIDFn represents a function that can return the trace id from
 // the specified context.
 type TraceIDFn func(ctx context.Context) string

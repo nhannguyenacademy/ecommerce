@@ -2,7 +2,6 @@ package mid
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/response"
@@ -14,7 +13,7 @@ func Panic(l *logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if r := recover(); r != nil {
-				err := errors.New(fmt.Sprintf("panic: %+v - stack: %s", r, string(stack(3))))
+				err := fmt.Errorf("panic: %+v - stack: %s", r, string(stack(3)))
 				response.Send(c, l, nil, err)
 				return
 			}

@@ -162,6 +162,9 @@ func run(ctx context.Context, log *logger.Logger) error {
 		KeyLookup: ks,
 		Issuer:    "ecommerce",
 	})
+	if err != nil {
+		return fmt.Errorf("creating auth: %w", err)
+	}
 
 	userBus := userbus.NewBusiness(
 		log,

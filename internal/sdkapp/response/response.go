@@ -1,3 +1,4 @@
+// Package response contains functions to send responses to clients.
 package response
 
 import (
