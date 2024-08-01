@@ -68,6 +68,8 @@ func startContainer(image string, name string, port string, dockerArgs []string,
 		return c, nil
 	}
 
+	// The -P, or --publish-all, flag publishes all the exposed ports to the host.
+	// Docker binds each exposed port to a random port on the host.
 	arg := []string{"run", "-P", "-d", "--name", name}
 	arg = append(arg, dockerArgs...)
 	arg = append(arg, image)
