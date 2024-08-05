@@ -8,3 +8,5 @@ import "embed"
 //
 //go:embed *
 var DevKeysFS embed.FS
+
+// todo: use DevKeysFS, remove the copy key line in dockerfile

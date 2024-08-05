@@ -1,14 +1,15 @@
 package userapp
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 	"net/http"
 	"net/mail"
 	"time"
 )
+
+// =============================================================================
+// Query params
 
 // QueryParams represents the set of possible query strings.
 type QueryParams struct {
@@ -53,12 +54,6 @@ type User struct {
 	DateUpdated  string   `json:"dateUpdated"`
 }
 
-// Encode implements the encoder interface.
-func (app User) Encode() ([]byte, string, error) {
-	data, err := json.Marshal(app)
-	return data, "application/json", err
-}
-
 func toAppUser(bus userbus.User) User {
 	return User{
 		ID:           bus.ID.String(),
@@ -92,20 +87,6 @@ type NewUser struct {
 	PasswordConfirm string   `json:"passwordConfirm" binding:"eqfield=Password"`
 }
 
-// Decode implements the decoder interface.
-func (app *NewUser) Decode(data []byte) error {
-	return json.Unmarshal(data, &app)
-}
-
-// Validate checks the data in the model is considered clean.
-func (app NewUser) Validate() error {
-	if err := errs.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
-	}
-
-	return nil
-}
-
 func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 	roles, err := userbus.ParseRoles(app.Roles)
 	if err != nil {
@@ -134,44 +115,6 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 
 // =============================================================================
 
-// UpdateUserRole defines the data needed to update a user role.
-type UpdateUserRole struct {
-	Roles []string `json:"roles" validate:"required"`
-}
-
-// Decode implements the decoder interface.
-func (app *UpdateUserRole) Decode(data []byte) error {
-	return json.Unmarshal(data, &app)
-}
-
-// Validate checks the data in the model is considered clean.
-func (app UpdateUserRole) Validate() error {
-	if err := errs.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
-	}
-
-	return nil
-}
-
-func toBusUpdateUserRole(app UpdateUserRole) (userbus.UpdateUser, error) {
-	var roles []userbus.Role
-	if app.Roles != nil {
-		var err error
-		roles, err = userbus.ParseRoles(app.Roles)
-		if err != nil {
-			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
-		}
-	}
-
-	bus := userbus.UpdateUser{
-		Roles: roles,
-	}
-
-	return bus, nil
-}
-
-// =============================================================================
-
 // UpdateUser defines the data needed to update a user.
 type UpdateUser struct {
 	Name            *string `json:"name"`
@@ -179,20 +122,6 @@ type UpdateUser struct {
 	Password        *string `json:"password"`
 	PasswordConfirm *string `json:"passwordConfirm" validate:"omitempty,eqfield=Password"`
 	Enabled         *bool   `json:"enabled"`
-}
-
-// Decode implements the decoder interface.
-func (app *UpdateUser) Decode(data []byte) error {
-	return json.Unmarshal(data, &app)
-}
-
-// Validate checks the data in the model is considered clean.
-func (app UpdateUser) Validate() error {
-	if err := errs.Check(app); err != nil {
-		return errs.Newf(errs.InvalidArgument, "validate: %s", err)
-	}
-
-	return nil
 }
 
 func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {

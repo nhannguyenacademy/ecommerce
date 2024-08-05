@@ -2,136 +2,40 @@
 package userapp
 
 import (
-	"context"
-	"errors"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
+	"github.com/gin-gonic/gin"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/query"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
 
-// App manages the set of app layer api functions for the user domain.
-type App struct {
+type app struct {
+	log     *logger.Logger
+	auth    *auth.Auth
 	userBus *userbus.Business
 }
 
-// NewApp constructs a user app API for use.
-func NewApp(userBus *userbus.Business) *App {
-	return &App{
+func New(
+	log *logger.Logger,
+	auth *auth.Auth,
+	userBus *userbus.Business,
+) *app {
+	return &app{
+		log:     log,
+		auth:    auth,
 		userBus: userBus,
 	}
 }
 
-// query returns a list of users with paging.
-func (a *App) query(ctx context.Context, qp QueryParams) (query.Result[User], error) {
-	page, err := page.Parse(qp.Page, qp.Rows)
-	if err != nil {
-		return query.Result[User]{}, errs.NewFieldsError("page", err)
-	}
+func (a *app) Routes(r gin.IRouter) {
+	authen := mid.Authenticate(a.log, a.auth)
+	ruleAdmin := mid.Authorize(a.log, a.auth, auth.Rules.Admin)
+	ruleAuthorizeUser := mid.AuthorizeUser(a.log, a.auth, a.userBus, auth.Rules.AdminOrSubject)
+	ruleAuthorizeAdmin := mid.AuthorizeUser(a.log, a.auth, a.userBus, auth.Rules.Admin)
 
-	filter, err := parseFilter(qp)
-	if err != nil {
-		return query.Result[User]{}, err
-	}
-
-	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
-	if err != nil {
-		return query.Result[User]{}, errs.NewFieldsError("order", err)
-	}
-
-	usrs, err := a.userBus.Query(ctx, filter, orderBy, page)
-	if err != nil {
-		return query.Result[User]{}, errs.Newf(errs.Internal, "query: %s", err)
-	}
-
-	total, err := a.userBus.Count(ctx, filter)
-	if err != nil {
-		return query.Result[User]{}, errs.Newf(errs.Internal, "count: %s", err)
-	}
-
-	return query.NewResult(toAppUsers(usrs), total, page), nil
-}
-
-// create adds a new user to the system.
-func (a *App) create(ctx context.Context, app NewUser) (User, error) {
-	nc, err := toBusNewUser(app)
-	if err != nil {
-		return User{}, errs.New(errs.InvalidArgument, err)
-	}
-
-	usr, err := a.userBus.Create(ctx, nc)
-	if err != nil {
-		if errors.Is(err, userbus.ErrUniqueEmail) {
-			return User{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
-		}
-		return User{}, errs.Newf(errs.Internal, "create: usr[%+v]: %s", usr, err)
-	}
-
-	return toAppUser(usr), nil
-}
-
-// queryByID returns a user by its Ia.
-func (a *App) queryByID(ctx context.Context) (User, error) {
-	usr, err := mid.GetUser(ctx)
-	if err != nil {
-		return User{}, errs.Newf(errs.Internal, "querybyid: %s", err)
-	}
-
-	return toAppUser(usr), nil
-}
-
-// updateRole updates an existing user's role.
-func (a *App) updateRole(ctx context.Context, app UpdateUserRole) (User, error) {
-	uu, err := toBusUpdateUserRole(app)
-	if err != nil {
-		return User{}, errs.New(errs.InvalidArgument, err)
-	}
-
-	usr, err := mid.GetUser(ctx)
-	if err != nil {
-		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
-	}
-
-	updUsr, err := a.userBus.Update(ctx, usr, uu)
-	if err != nil {
-		return User{}, errs.Newf(errs.Internal, "updaterole: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
-	}
-
-	return toAppUser(updUsr), nil
-}
-
-// update updates an existing user.
-func (a *App) update(ctx context.Context, app UpdateUser) (User, error) {
-	uu, err := toBusUpdateUser(app)
-	if err != nil {
-		return User{}, errs.New(errs.InvalidArgument, err)
-	}
-
-	usr, err := mid.GetUser(ctx)
-	if err != nil {
-		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
-	}
-
-	updUsr, err := a.userBus.Update(ctx, usr, uu)
-	if err != nil {
-		return User{}, errs.Newf(errs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
-	}
-
-	return toAppUser(updUsr), nil
-}
-
-// delete removes a user from the system.
-func (a *App) delete(ctx context.Context) error {
-	usr, err := mid.GetUser(ctx)
-	if err != nil {
-		return errs.Newf(errs.Internal, "userID missing in context: %s", err)
-	}
-
-	if err := a.userBus.Delete(ctx, usr); err != nil {
-		return errs.Newf(errs.Internal, "delete: userID[%s]: %s", usr.ID, err)
-	}
-
-	return nil
+	r.GET("/users", authen, ruleAdmin, a.queryController)
+	r.GET("/users/:user_id", authen, ruleAuthorizeUser, a.queryByIDController)
+	r.POST("/users", authen, ruleAdmin, a.createController)
+	r.PUT("/users/:user_id", authen, ruleAuthorizeUser, a.updateController)
+	r.DELETE("/users/:user_id", authen, ruleAuthorizeAdmin, a.deleteController)
 }

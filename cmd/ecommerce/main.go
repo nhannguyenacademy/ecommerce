@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/gin-gonic/gin"
-	"github.com/nhannguyenacademy/ecommerce/internal/check/checkapp"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/delegate"
@@ -20,13 +19,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"runtime"
 	"syscall"
 	"time"
 )
 
 const (
-	v1 = "v1"
+	apiV1GroupName = "api/v1"
 )
 
 var build = "develop"
@@ -38,14 +36,13 @@ type config struct {
 		WriteTimeout       time.Duration `conf:"default:10s"`
 		IdleTimeout        time.Duration `conf:"default:120s"`
 		ShutdownTimeout    time.Duration `conf:"default:20s"`
-		APIHost            string        `conf:"default:0.0.0.0:3000"`
-		DebugHost          string        `conf:"default:0.0.0.0:3010"`
+		APIHost            string        `conf:"default:0.0.0.0:8080"`
 		CORSAllowedOrigins []string      `conf:"default:*"`
 	}
 	Auth struct {
 		KeysFolder string `conf:"default:configs/keys/"`
 		ActiveKID  string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
-		Issuer     string `conf:"default:service project"`
+		Issuer     string `conf:"default:Nhan Nguyen Academy"`
 	}
 	DB struct {
 		User         string `conf:"default:postgres"`
@@ -85,11 +82,6 @@ func main() {
 
 func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
-	// GOMAXPROCS
-
-	log.Info(ctx, "startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
-
-	// -------------------------------------------------------------------------
 	// Configuration
 
 	cfg := config{
@@ -110,7 +102,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	}
 
 	// -------------------------------------------------------------------------
-	// App Starting
+	// app Starting
 
 	log.Info(ctx, "starting service", "version", cfg.Build)
 	defer log.Info(ctx, "shutdown complete")
@@ -142,59 +134,43 @@ func run(ctx context.Context, log *logger.Logger) error {
 	defer db.Close()
 
 	// -------------------------------------------------------------------------
-	// Start API Service
-
-	log.Info(ctx, "startup", "status", "initializing V1 API support")
-
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	delegate := delegate.New(log)
 
+	// -------------------------------------------------------------------------
+	// Init auth
 	ks := keystore.New()
 	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
 		return fmt.Errorf("reading keys: %w", err)
 	}
 
-	ath, err := auth.New(auth.Config{
-		Log:       log,
-		DB:        db,
-		KeyLookup: ks,
-		Issuer:    "ecommerce",
-	})
+	ath, err := auth.New(auth.Config{Log: log, DB: db, KeyLookup: ks, Issuer: "ecommerce"})
 	if err != nil {
 		return fmt.Errorf("creating auth: %w", err)
 	}
 
-	userBus := userbus.NewBusiness(
-		log,
-		delegate,
-		usercache.NewStore(
-			log,
-			userdb.NewStore(log, db),
-			time.Hour,
-		),
-	)
+	// -------------------------------------------------------------------------
+	// Init businesses
+	userBus := userbus.NewBusiness(log, delegate, usercache.NewStore(log, userdb.NewStore(log, db), time.Hour))
 
+	// -------------------------------------------------------------------------
+	// Start API Service
+
+	log.Info(ctx, "startup", "status", "initializing V1 API support")
+
+	// Shutdown handling
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+
+	// Setup routes
+	// todo: cors, tracing, metrics
 	gin.SetMode(gin.ReleaseMode)
 	ginEngine := gin.New()
-	// todo:
-	// - cors
-	// - tracing
-	// - metrics
-	v1Router := ginEngine.Group(v1)
-	v1Router.Use(mid.Logging(log), mid.Panic(log))
-	userapp.Routes(v1Router, userapp.Config{
-		Log:     log,
-		UserBus: userBus,
-		Auth:    ath,
-	})
-	checkapp.Routes(v1Router, checkapp.Config{
-		Log:   log,
-		DB:    db,
-		Build: cfg.Build,
-	})
+	apiV1Router := ginEngine.Group(apiV1GroupName)
+	apiV1Router.Use(mid.Logging(log, []string{}), mid.Panic(log))
+	userapp.New(log, ath, userBus).Routes(apiV1Router)
 
+	// Construct API server
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
 		Handler:      ginEngine.Handler(),

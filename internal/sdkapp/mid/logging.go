@@ -7,6 +7,7 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"io"
 	"net/url"
+	"slices"
 	"time"
 )
 
@@ -21,7 +22,7 @@ func (w *customResponseWriter) Write(b []byte) (int, error) {
 	return w.ResponseWriter.Write(b)
 }
 
-func Logging(l *logger.Logger) gin.HandlerFunc {
+func Logging(l *logger.Logger, skipPaths []string) gin.HandlerFunc {
 	ginPath := func(c *gin.Context) string {
 		if c.FullPath() != "" {
 			return c.FullPath()
@@ -51,6 +52,10 @@ func Logging(l *logger.Logger) gin.HandlerFunc {
 	}
 
 	return func(c *gin.Context) {
+		if slices.Contains(skipPaths, ginPath(c)) {
+			c.Next()
+			return
+		}
 		ctx, start := c.Request.Context(), time.Now()
 
 		l := l.With(map[string]any{

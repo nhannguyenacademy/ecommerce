@@ -7,6 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// =============================================================================
+
 // User represents information about an individual user.
 type User struct {
 	ID           uuid.UUID
@@ -19,6 +21,8 @@ type User struct {
 	DateUpdated  time.Time
 }
 
+// =============================================================================
+
 // NewUser contains information needed to create a new user.
 type NewUser struct {
 	Name     Name
@@ -26,6 +30,8 @@ type NewUser struct {
 	Roles    []Role
 	Password string
 }
+
+// =============================================================================
 
 // UpdateUser contains information needed to update a user.
 type UpdateUser struct {

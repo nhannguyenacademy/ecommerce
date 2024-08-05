@@ -1,10 +1,9 @@
 package userbus
 
 import (
+	"github.com/google/uuid"
 	"net/mail"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 // QueryFilter holds the available fields a query can be filtered on.

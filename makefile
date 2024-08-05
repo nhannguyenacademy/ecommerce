@@ -5,20 +5,8 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 # ==============================================================================
 # Brew Installation
 #
-#	Having brew installed will simplify the process of installing all the tooling.
-#
-#	Run this command to install brew on your machine. This works for Linux, Mac and Windows.
-#	The script explains what it will do and then pauses before it does it.
+# 	Install Homebrew:
 #	$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-#
-#	WINDOWS MACHINES
-#	These are extra things you will most likely need to do after installing brew
-#
-# 	Run these three commands in your terminal to add Homebrew to your PATH:
-# 	Replace <name> with your username.
-#	$ echo '# Set PATH, MANPATH, etc., for Homebrew.' >> /home/<name>/.profile
-#	$ echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/<name>/.profile
-#	$ eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 #
 # 	Install Homebrew's dependencies:
 #	$ sudo apt-get install build-essential
@@ -78,11 +66,11 @@ dev-gotooling:
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install golang.org/x/tools/cmd/goimports@latest
+	go install github.com/swaggo/swag/cmd/swag@latest
 
 dev-brew:
 	brew update
-	brew list pgcli || brew install pgcli
-	brew list watch || brew install watch
+	brew list golang-migrate || brew install golang-migrate
 
 dev-docker:
 	docker pull $(POSTGRES) & \
@@ -175,39 +163,39 @@ test: test-r lint vuln-check
 # Hitting endpoints
 
 readiness:
-	curl -il http://localhost:3000/v1/readiness
+	curl -il http://localhost:8080/api/v1/readiness
 
 liveness:
-	curl -il http://localhost:3000/v1/liveness
+	curl -il http://localhost:8080/api/v1/liveness
 
 token:
 	curl -il \
-	--user "admin@example.com:gophers" http://localhost:3000/v1/auth/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+	--user "admin@example.com:gophers" http://localhost:8080/api/v1/auth/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
 create-user:
 	curl -il -X POST \
 	-H "Authorization: Bearer ${TOKEN}" \
 	-H 'Content-Type: application/json' \
 	-d '{"name":"Nhan Nguyen","email":"nhannguyen@email.com","roles":["ADMIN"],"password":"test123","passwordConfirm":"test123"}' \
-	http://localhost:3000/v1/users
+	http://localhost:8080/api/v1/users
 
 users:
 	curl -il \
-	-H "Authorization: Bearer ${TOKEN}" "http://localhost:3000/v1/users?page=1&rows=2"
+	-H "Authorization: Bearer ${TOKEN}" "http://localhost:8080/api/v1/users?page=1&rows=2"
 
 users-timeout: # Timeout after 1 second
 	curl -il \
 	--max-time 1 \
-	-H "Authorization: Bearer ${TOKEN}" "http://localhost:3000/v1/users?page=1&rows=2"
+	-H "Authorization: Bearer ${TOKEN}" "http://localhost:8080/api/v1/users?page=1&rows=2"
 
 load:
 	hey -m GET -c 100 -n 1000 \
-	-H "Authorization: Bearer ${TOKEN}" "http://localhost:3000/v1/users?page=1&rows=2"
+	-H "Authorization: Bearer ${TOKEN}" "http://localhost:8080/api/v1/users?page=1&rows=2"
 
 otel-test:
 	curl -il \
 	-H "Traceparent: 00-918dd5ecf264712262b68cf2ef8b5239-896d90f23f69f006-01" \
-	--user "admin@example.com:gophers" http://localhost:3000/v1/users/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+	--user "admin@example.com:gophers" http://localhost:8080/api/v1/users/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
 # ==============================================================================
 # Modules support
