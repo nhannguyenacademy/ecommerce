@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/delegate"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
@@ -35,21 +34,18 @@ type Storer interface {
 
 // Business manages the set of APIs for user access.
 type Business struct {
-	log      *logger.Logger
-	storer   Storer
-	delegate *delegate.Delegate
+	log    *logger.Logger
+	storer Storer
 }
 
 // NewBusiness constructs a user business API for use.
 func NewBusiness(
 	log *logger.Logger,
-	delegate *delegate.Delegate,
 	storer Storer,
 ) *Business {
 	return &Business{
-		log:      log,
-		storer:   storer,
-		delegate: delegate,
+		log:    log,
+		storer: storer,
 	}
 }
 

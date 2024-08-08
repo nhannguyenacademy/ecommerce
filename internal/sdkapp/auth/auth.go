@@ -59,7 +59,7 @@ func New(cfg Config) (*Auth, error) {
 	// If a database connection is not provided, we won't perform the user enabled check.
 	var userBus *userbus.Business
 	if cfg.DB != nil {
-		userBus = userbus.NewBusiness(cfg.Log, nil, usercache.NewStore(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB), 10*time.Minute))
+		userBus = userbus.NewBusiness(cfg.Log, usercache.NewStore(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB), 10*time.Minute))
 	}
 
 	a := Auth{

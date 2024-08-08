@@ -66,11 +66,11 @@ dev-gotooling:
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install golang.org/x/tools/cmd/goimports@latest
-	go install github.com/swaggo/swag/cmd/swag@latest
 
 dev-brew:
 	brew update
 	brew list golang-migrate || brew install golang-migrate
+	brew list mockery || brew install mockery # https://vektra.github.io/mockery/latest/notes/#internal-error-package-without-types-was-imported
 
 dev-docker:
 	docker pull $(POSTGRES) & \
@@ -216,3 +216,9 @@ deps-upgrade:
 	go get -u -v ./...
 	go mod tidy
 	go mod vendor
+
+# ==============================================================================
+# Mocks
+
+mock:
+	mockery --config=./configs/mockery/mockery.yaml

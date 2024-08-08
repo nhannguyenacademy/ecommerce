@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/delegate"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userapp"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
@@ -136,10 +135,6 @@ func run(ctx context.Context, log *logger.Logger) error {
 	defer db.Close()
 
 	// -------------------------------------------------------------------------
-
-	delegate := delegate.New(log)
-
-	// -------------------------------------------------------------------------
 	// Init auth
 	ks := keystore.New()
 	if err := ks.LoadRSAKeys(os.DirFS(cfg.Auth.KeysFolder)); err != nil {
@@ -153,7 +148,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	// -------------------------------------------------------------------------
 	// Init businesses
-	userBus := userbus.NewBusiness(log, delegate, usercache.NewStore(log, userdb.NewStore(log, db), time.Hour))
+	userBus := userbus.NewBusiness(log, usercache.NewStore(log, userdb.NewStore(log, db), time.Hour))
 
 	// -------------------------------------------------------------------------
 	// Start API Service
