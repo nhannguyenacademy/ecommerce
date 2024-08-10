@@ -7,16 +7,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userstore/usercache"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userstore/userdb"
-	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
-	"strings"
-	"time"
-
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/user/userstore/userdb"
+	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
+	"strings"
 )
 
 // ErrForbidden is returned when a auth issue is identified.
@@ -59,7 +56,7 @@ func New(cfg Config) (*Auth, error) {
 	// If a database connection is not provided, we won't perform the user enabled check.
 	var userBus *userbus.Business
 	if cfg.DB != nil {
-		userBus = userbus.NewBusiness(cfg.Log, usercache.NewStore(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB), 10*time.Minute))
+		userBus = userbus.NewBusiness(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB))
 	}
 
 	a := Auth{

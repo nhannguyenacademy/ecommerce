@@ -11,7 +11,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userapp"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userstore/usercache"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userstore/userdb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/keystore"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
@@ -30,12 +29,12 @@ var build = "develop"
 
 type config struct {
 	conf.Version
-	Web struct {
+	Server struct {
 		ReadTimeout        time.Duration `conf:"default:5s"`
 		WriteTimeout       time.Duration `conf:"default:10s"`
 		IdleTimeout        time.Duration `conf:"default:120s"`
 		ShutdownTimeout    time.Duration `conf:"default:20s"`
-		APIHost            string        `conf:"default:0.0.0.0:8080"`
+		Host               string        `conf:"default:0.0.0.0:8080"`
 		CORSAllowedOrigins []string      `conf:"default:*"`
 	}
 	Auth struct {
@@ -148,7 +147,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	// -------------------------------------------------------------------------
 	// Init businesses
-	userBus := userbus.NewBusiness(log, usercache.NewStore(log, userdb.NewStore(log, db), time.Hour))
+	userBus := userbus.NewBusiness(log, userdb.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
 	// Start API Service
@@ -169,11 +168,11 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	// Construct API server
 	api := http.Server{
-		Addr:         cfg.Web.APIHost,
+		Addr:         cfg.Server.Host,
 		Handler:      ginEngine.Handler(),
-		ReadTimeout:  cfg.Web.ReadTimeout,
-		WriteTimeout: cfg.Web.WriteTimeout,
-		IdleTimeout:  cfg.Web.IdleTimeout,
+		ReadTimeout:  cfg.Server.ReadTimeout,
+		WriteTimeout: cfg.Server.WriteTimeout,
+		IdleTimeout:  cfg.Server.IdleTimeout,
 		ErrorLog:     logger.NewStdLogger(log, logger.LevelError),
 	}
 
@@ -193,7 +192,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 		log.Info(ctx, "shutdown", "status", "shutdown started", "signal", sig)
 		defer log.Info(ctx, "shutdown", "status", "shutdown complete", "signal", sig)
 
-		ctx, cancel := context.WithTimeout(ctx, cfg.Web.ShutdownTimeout)
+		ctx, cancel := context.WithTimeout(ctx, cfg.Server.ShutdownTimeout)
 		defer cancel()
 
 		if err := api.Shutdown(ctx); err != nil {

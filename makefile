@@ -52,11 +52,11 @@ PROMTAIL        := grafana/promtail:2.9.0
 
 BASE_IMAGE_NAME := local/nhannguyenacademy
 ECOMMERCE_APP   := ecommerce
-VERSION         := 0.0.1
+VERSION         := 1.0.0
 ECOMMERCE_IMAGE := $(BASE_IMAGE_NAME)/$(ECOMMERCE_APP):$(VERSION)
 METRICS_IMAGE   := $(BASE_IMAGE_NAME)/metrics:$(VERSION)
 
-# VERSION       := "0.0.1-$(shell git rev-parse --short HEAD)"
+# VERSION       := "1.0.0-$(shell git rev-parse --short HEAD)"
 
 # ==============================================================================
 # Install dependencies
@@ -83,11 +83,14 @@ dev-docker:
 #	docker pull $(PROMTAIL) & \
 	wait;
 
+// ==============================================================================
+
+run:
+	export ECOMMERCE_DB_HOST=localhost ECOMMERCE_SERVER_HOST=0.0.0.0:8081; go run cmd/ecommerce/main.go
+
 # ==============================================================================
 # Building containers
 
-run:
-	export ECOMMERCE_DB_HOST=localhost; go run cmd/ecommerce/main.go
 
 build: ecommerce
 
@@ -114,8 +117,9 @@ compose-logs:
 	cd ./deployments/compose/ && docker compose -f docker_compose.yaml logs --follow
 
 # ==============================================================================
-# Administration
+# Run admin commands from local
 
+# example: make create-migration name=create_users_table
 create-migration:
 	migrate create -ext sql -dir internal/sdkbus/migrate/migrations -seq $(name)
 
@@ -141,11 +145,9 @@ grafana:
 	open -a "Google Chrome" http://localhost:3100/
 
 # ==============================================================================
-# Running tests within the local computer
+# Unit-tests, linting, and security checks
 
-test-down:
-	docker stop servicetest
-	docker rm servicetest -v
+test: test-r lint vuln-check
 
 test-r:
 	CGO_ENABLED=1 go test -race -count=1 ./...
@@ -157,16 +159,11 @@ lint:
 vuln-check:
 	govulncheck ./...
 
-test: test-r lint vuln-check
+mock:
+	mockery --config=./configs/mockery/mockery.yaml
 
 # ==============================================================================
 # Hitting endpoints
-
-readiness:
-	curl -il http://localhost:8080/api/v1/readiness
-
-liveness:
-	curl -il http://localhost:8080/api/v1/liveness
 
 token:
 	curl -il \
@@ -181,11 +178,6 @@ create-user:
 
 users:
 	curl -il \
-	-H "Authorization: Bearer ${TOKEN}" "http://localhost:8080/api/v1/users?page=1&rows=2"
-
-users-timeout: # Timeout after 1 second
-	curl -il \
-	--max-time 1 \
 	-H "Authorization: Bearer ${TOKEN}" "http://localhost:8080/api/v1/users?page=1&rows=2"
 
 load:
@@ -217,8 +209,3 @@ deps-upgrade:
 	go mod tidy
 	go mod vendor
 
-# ==============================================================================
-# Mocks
-
-mock:
-	mockery --config=./configs/mockery/mockery.yaml

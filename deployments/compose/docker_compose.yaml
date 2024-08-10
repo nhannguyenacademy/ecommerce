@@ -14,7 +14,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-#    cpu_count: 2
+    cpu_count: 2
     networks:
       - backend-network
 
@@ -43,12 +43,6 @@ services:
       - GOMAXPROCS
       - GOGC=off
       - GOMEMLIMIT
-#    healthcheck:
-#      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/v1/liveness || exit 1"]
-#      interval: 5s
-#      timeout: 5s
-#      retries: 2
-#      start_period: 2s
     networks:
       - backend-network
     depends_on:

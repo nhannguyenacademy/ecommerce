@@ -4,7 +4,6 @@ go 1.22.5
 
 require (
 	github.com/ardanlabs/conf/v3 v3.1.7
-	github.com/creativecreature/sturdyc v1.0.4
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
@@ -23,11 +22,9 @@ require (
 )
 
 require (
-	github.com/OneOfOne/xxhash v1.2.8 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
-	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
