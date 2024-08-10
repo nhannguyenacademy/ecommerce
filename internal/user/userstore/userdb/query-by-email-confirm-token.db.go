@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
-	"net/mail"
 )
 
-// QueryByEmail gets the specified user from the database by email.
-func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.User, error) {
+// QueryByEmailConfirmToken gets the specified user from the database by email confirm token.
+func (s *Store) QueryByEmailConfirmToken(ctx context.Context, emailConfirmToken string) (userbus.User, error) {
 	data := struct {
-		Email string `db:"email"`
+		EmailConfirmToken string `db:"email_confirm_token"`
 	}{
-		Email: email.Address,
+		EmailConfirmToken: emailConfirmToken,
 	}
 
 	const q = `
@@ -23,7 +22,7 @@ func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.U
 	FROM
 		users
 	WHERE
-		email = :email`
+		email_confirm_token = :email_confirm_token`
 
 	var dbUsr user
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {

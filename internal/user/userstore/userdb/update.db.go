@@ -19,6 +19,7 @@ func (s *Store) Update(ctx context.Context, usr userbus.User) error {
 		"roles" = :roles,
 		"password_hash" = :password_hash,
 		"enabled" = :enabled,
+		"email_confirm_token" = :email_confirm_token,
 		"date_updated" = :date_updated
 	WHERE
 		user_id = :user_id`

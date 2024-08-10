@@ -11,14 +11,15 @@ import (
 
 // User represents information about an individual user.
 type User struct {
-	ID           uuid.UUID
-	Name         Name
-	Email        mail.Address
-	Roles        []Role
-	PasswordHash []byte
-	Enabled      bool
-	DateCreated  time.Time
-	DateUpdated  time.Time
+	ID                uuid.UUID
+	Name              Name
+	Email             mail.Address
+	Roles             []Role
+	PasswordHash      string
+	Enabled           bool
+	EmailConfirmToken string
+	DateCreated       time.Time
+	DateUpdated       time.Time
 }
 
 // =============================================================================

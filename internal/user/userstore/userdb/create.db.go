@@ -12,9 +12,9 @@ import (
 func (s *Store) Create(ctx context.Context, usr userbus.User) error {
 	const q = `
 	INSERT INTO users
-		(user_id, name, email, password_hash, roles, enabled, date_created, date_updated)
+		(user_id, name, email, password_hash, roles, enabled, email_confirm_token, date_created, date_updated)
 	VALUES
-		(:user_id, :name, :email, :password_hash, :roles, :enabled, :date_created, :date_updated)`
+		(:user_id, :name, :email, :password_hash, :roles, :enabled, :email_confirm_token, :date_created, :date_updated)`
 
 	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBUser(usr)); err != nil {
 		if errors.Is(err, sqldb.ErrDBDuplicatedEntry) {

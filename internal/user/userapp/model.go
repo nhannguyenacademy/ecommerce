@@ -48,7 +48,7 @@ type User struct {
 	Name         string   `json:"name"`
 	Email        string   `json:"email"`
 	Roles        []string `json:"roles"`
-	PasswordHash []byte   `json:"-"`
+	PasswordHash string   `json:"-"`
 	Enabled      bool     `json:"enabled"`
 	DateCreated  string   `json:"dateCreated"`
 	DateUpdated  string   `json:"dateUpdated"`

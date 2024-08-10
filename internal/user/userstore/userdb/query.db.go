@@ -19,7 +19,7 @@ func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy o
 
 	const q = `
 	SELECT
-		user_id, name, email, password_hash, roles, enabled, date_created, date_updated
+		user_id, name, email, password_hash, roles, enabled, email_confirm_token, date_created, date_updated
 	FROM
 		users`
 

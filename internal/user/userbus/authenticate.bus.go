@@ -16,7 +16,7 @@ func (b *Business) Authenticate(ctx context.Context, email mail.Address, passwor
 		return User{}, fmt.Errorf("query: email[%s]: %w", email, err)
 	}
 
-	if err := bcrypt.CompareHashAndPassword(usr.PasswordHash, []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(usr.PasswordHash), []byte(password)); err != nil {
 		return User{}, fmt.Errorf("comparehashandpassword: %w", ErrAuthenticationFailure)
 	}
 

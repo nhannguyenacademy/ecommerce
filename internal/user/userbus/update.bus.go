@@ -26,7 +26,7 @@ func (b *Business) Update(ctx context.Context, usr User, uu UpdateUser) (User, e
 		if err != nil {
 			return User{}, fmt.Errorf("generatefrompassword: %w", err)
 		}
-		usr.PasswordHash = pw
+		usr.PasswordHash = string(pw)
 	}
 
 	if uu.Enabled != nil {

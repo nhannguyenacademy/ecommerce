@@ -21,7 +21,7 @@ func (b *Business) Create(ctx context.Context, nu NewUser) (User, error) {
 		ID:           uuid.New(),
 		Name:         nu.Name,
 		Email:        nu.Email,
-		PasswordHash: hash,
+		PasswordHash: string(hash),
 		Roles:        nu.Roles,
 		Enabled:      true,
 		DateCreated:  now,
