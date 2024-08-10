@@ -33,7 +33,6 @@ RUN addgroup -g 1000 -S service_grp && \
 COPY --from=builder --chown=service_grp:service_usr /service/tools/admin/admin /service/admin
 COPY --from=builder --chown=service_grp:service_usr /service/cmd/ecommerce/ecommerce /service/ecommerce
 COPY --from=builder --chown=service_grp:service_usr /service/configs/keys /service/configs/keys
-COPY --from=builder --chown=service_grp:service_usr /service/internal/sdkbus/migrate/migrations /service/internal/sdkbus/migrate/migrations
 WORKDIR /service
 USER service_usr
 CMD ["./ecommerce"]
