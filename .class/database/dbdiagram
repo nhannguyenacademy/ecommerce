@@ -13,7 +13,7 @@ Table users {
 Table products {
   product_id uuid [primary key]
   name text [not null]
-  desc text [null]
+  description text [null]
   imageURL text [null]
   price bigint [not null]
   quantity int [not null]
