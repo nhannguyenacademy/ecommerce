@@ -59,7 +59,7 @@ func (a *app) login(ctx context.Context, lu loginUser) (authenUser, error) {
 	}
 
 	return authenUser{
-		User:  toAppUser(usr),
-		Token: token,
+		UserID: usr.ID.String(),
+		Token:  token,
 	}, nil
 }

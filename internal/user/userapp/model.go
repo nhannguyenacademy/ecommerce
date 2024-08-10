@@ -79,8 +79,8 @@ func toAppUsers(users []userbus.User) []user {
 // =============================================================================
 
 type authenUser struct {
-	User  user   `json:"user"`
-	Token string `json:"token"`
+	UserID string `json:"user_id"`
+	Token  string `json:"token"`
 }
 
 // =============================================================================
