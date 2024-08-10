@@ -11,7 +11,7 @@ import (
 )
 
 func (a *app) updateController(c *gin.Context) {
-	var uu UpdateUser
+	var uu updateUser
 	if err := c.ShouldBindJSON(&uu); err != nil {
 		var vErrs validator.ValidationErrors
 		if errors.As(err, &vErrs) {
@@ -26,20 +26,20 @@ func (a *app) updateController(c *gin.Context) {
 	response.Send(c, a.log, u, err)
 }
 
-func (a *app) update(ctx context.Context, app UpdateUser) (User, error) {
+func (a *app) update(ctx context.Context, app updateUser) (user, error) {
 	uu, err := toBusUpdateUser(app)
 	if err != nil {
-		return User{}, errs.New(errs.InvalidArgument, err)
+		return user{}, errs.New(errs.InvalidArgument, err)
 	}
 
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return User{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
+		return user{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
 	}
 
 	updUsr, err := a.userBus.Update(ctx, usr, uu)
 	if err != nil {
-		return User{}, errs.Newf(errs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
+		return user{}, errs.Newf(errs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
 	}
 
 	return toAppUser(updUsr), nil

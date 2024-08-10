@@ -10,9 +10,9 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 )
 
-func (a *app) createController(c *gin.Context) {
-	var nu newUser
-	if err := c.ShouldBindJSON(&nu); err != nil {
+func (a *app) registerController(c *gin.Context) {
+	var ru registerUser
+	if err := c.ShouldBindJSON(&ru); err != nil {
 		var vErrs validator.ValidationErrors
 		if errors.As(err, &vErrs) {
 			err = errs.Newf(errs.InvalidArgument, "%s", vErrs)
@@ -22,22 +22,22 @@ func (a *app) createController(c *gin.Context) {
 		return
 	}
 
-	u, err := a.create(c.Request.Context(), nu)
+	u, err := a.register(c.Request.Context(), ru)
 	response.Send(c, a.log, u, err)
 }
 
-func (a *app) create(ctx context.Context, app newUser) (user, error) {
-	nc, err := toBusNewUser(app)
+func (a *app) register(ctx context.Context, ru registerUser) (user, error) {
+	bru, err := toBusRegisterUser(ru)
 	if err != nil {
 		return user{}, errs.New(errs.InvalidArgument, err)
 	}
 
-	usr, err := a.userBus.Create(ctx, nc)
+	usr, err := a.userBus.Register(ctx, bru)
 	if err != nil {
 		if errors.Is(err, userbus.ErrUniqueEmail) {
 			return user{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
 		}
-		return user{}, errs.Newf(errs.Internal, "create: usr[%+v]: %s", usr, err)
+		return user{}, errs.Newf(errs.Internal, "register: usr[%+v]: %s", usr, err)
 	}
 
 	return toAppUser(usr), nil

@@ -13,10 +13,10 @@ func (a *app) queryByIDController(c *gin.Context) {
 	response.Send(c, a.log, u, err)
 }
 
-func (a *app) queryByID(ctx context.Context) (User, error) {
+func (a *app) queryByID(ctx context.Context) (user, error) {
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
-		return User{}, errs.Newf(errs.Internal, "querybyid: %s", err)
+		return user{}, errs.Newf(errs.Internal, "querybyid: %s", err)
 	}
 
 	return toAppUser(usr), nil

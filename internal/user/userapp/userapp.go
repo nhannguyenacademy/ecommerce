@@ -33,6 +33,7 @@ func (a *app) Routes(r gin.IRouter) {
 	ruleAuthorizeUser := mid.AuthorizeUser(a.log, a.auth, a.userBus, auth.Rules.AdminOrSubject)
 	ruleAuthorizeAdmin := mid.AuthorizeUser(a.log, a.auth, a.userBus, auth.Rules.Admin)
 
+	r.POST("/users/register", a.registerController)
 	r.GET("/users", authen, ruleAdmin, a.queryController)
 	r.GET("/users/:user_id", authen, ruleAuthorizeUser, a.queryByIDController)
 	r.POST("/users", authen, ruleAdmin, a.createController)

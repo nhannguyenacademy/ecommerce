@@ -11,8 +11,8 @@ import (
 // =============================================================================
 // Query params
 
-// QueryParams represents the set of possible query strings.
-type QueryParams struct {
+// queryParams represents the set of possible query strings.
+type queryParams struct {
 	Page             string
 	Rows             string
 	OrderBy          string
@@ -23,10 +23,10 @@ type QueryParams struct {
 	EndCreatedDate   string
 }
 
-func parseQueryParams(r *http.Request) QueryParams {
+func parseQueryParams(r *http.Request) queryParams {
 	values := r.URL.Query()
 
-	filter := QueryParams{
+	filter := queryParams{
 		Page:             values.Get("page"),
 		Rows:             values.Get("row"),
 		OrderBy:          values.Get("orderBy"),
@@ -42,8 +42,8 @@ func parseQueryParams(r *http.Request) QueryParams {
 
 // =============================================================================
 
-// User represents information about an individual user.
-type User struct {
+// user represents information about an individual user.
+type user struct {
 	ID           string   `json:"id"`
 	Name         string   `json:"name"`
 	Email        string   `json:"email"`
@@ -54,8 +54,8 @@ type User struct {
 	DateUpdated  string   `json:"dateUpdated"`
 }
 
-func toAppUser(bus userbus.User) User {
-	return User{
+func toAppUser(bus userbus.User) user {
+	return user{
 		ID:           bus.ID.String(),
 		Name:         bus.Name.String(),
 		Email:        bus.Email.Address,
@@ -67,8 +67,8 @@ func toAppUser(bus userbus.User) User {
 	}
 }
 
-func toAppUsers(users []userbus.User) []User {
-	app := make([]User, len(users))
+func toAppUsers(users []userbus.User) []user {
+	app := make([]user, len(users))
 	for i, usr := range users {
 		app[i] = toAppUser(usr)
 	}
@@ -78,8 +78,38 @@ func toAppUsers(users []userbus.User) []User {
 
 // =============================================================================
 
-// NewUser defines the data needed to add a new user.
-type NewUser struct {
+// registerUser defines the data needed to register a new user.
+type registerUser struct {
+	Name            string `json:"name" binding:"required"`
+	Email           string `json:"email" binding:"required,email"`
+	Password        string `json:"password" binding:"required"`
+	PasswordConfirm string `json:"passwordConfirm" binding:"eqfield=Password"`
+}
+
+func toBusRegisterUser(app registerUser) (userbus.RegisterUser, error) {
+	addr, err := mail.ParseAddress(app.Email)
+	if err != nil {
+		return userbus.RegisterUser{}, fmt.Errorf("parse: %w", err)
+	}
+
+	name, err := userbus.ParseName(app.Name)
+	if err != nil {
+		return userbus.RegisterUser{}, fmt.Errorf("parse: %w", err)
+	}
+
+	bus := userbus.RegisterUser{
+		Name:     name,
+		Email:    *addr,
+		Password: app.Password,
+	}
+
+	return bus, nil
+}
+
+// =============================================================================
+
+// newUser defines the data needed to add a new user.
+type newUser struct {
 	Name            string   `json:"name" binding:"required"`
 	Email           string   `json:"email" binding:"required,email"`
 	Roles           []string `json:"roles" binding:"required"`
@@ -87,7 +117,7 @@ type NewUser struct {
 	PasswordConfirm string   `json:"passwordConfirm" binding:"eqfield=Password"`
 }
 
-func toBusNewUser(app NewUser) (userbus.NewUser, error) {
+func toBusNewUser(app newUser) (userbus.NewUser, error) {
 	roles, err := userbus.ParseRoles(app.Roles)
 	if err != nil {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
@@ -115,8 +145,8 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 
 // =============================================================================
 
-// UpdateUser defines the data needed to update a user.
-type UpdateUser struct {
+// updateUser defines the data needed to update a user.
+type updateUser struct {
 	Name            *string `json:"name"`
 	Email           *string `json:"email" validate:"omitempty,email"`
 	Password        *string `json:"password"`
@@ -124,7 +154,7 @@ type UpdateUser struct {
 	Enabled         *bool   `json:"enabled"`
 }
 
-func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {
+func toBusUpdateUser(app updateUser) (userbus.UpdateUser, error) {
 	var addr *mail.Address
 	if app.Email != nil {
 		var err error

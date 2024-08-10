@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func parseFilter(qp QueryParams) (userbus.QueryFilter, error) {
+func parseFilter(qp queryParams) (userbus.QueryFilter, error) {
 	var filter userbus.QueryFilter
 
 	if qp.ID != "" {

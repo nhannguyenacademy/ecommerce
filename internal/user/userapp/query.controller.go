@@ -15,30 +15,30 @@ func (a *app) queryController(c *gin.Context) {
 	response.Send(c, a.log, results, err)
 }
 
-func (a *app) query(ctx context.Context, qp QueryParams) (query.Result[User], error) {
+func (a *app) query(ctx context.Context, qp queryParams) (query.Result[user], error) {
 	page, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
-		return query.Result[User]{}, errs.NewFieldsError("page", err)
+		return query.Result[user]{}, errs.NewFieldsError("page", err)
 	}
 
 	filter, err := parseFilter(qp)
 	if err != nil {
-		return query.Result[User]{}, err
+		return query.Result[user]{}, err
 	}
 
 	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
 	if err != nil {
-		return query.Result[User]{}, errs.NewFieldsError("order", err)
+		return query.Result[user]{}, errs.NewFieldsError("order", err)
 	}
 
 	usrs, err := a.userBus.Query(ctx, filter, orderBy, page)
 	if err != nil {
-		return query.Result[User]{}, errs.Newf(errs.Internal, "query: %s", err)
+		return query.Result[user]{}, errs.Newf(errs.Internal, "query: %s", err)
 	}
 
 	total, err := a.userBus.Count(ctx, filter)
 	if err != nil {
-		return query.Result[User]{}, errs.Newf(errs.Internal, "count: %s", err)
+		return query.Result[user]{}, errs.Newf(errs.Internal, "count: %s", err)
 	}
 
 	return query.NewResult(toAppUsers(usrs), total, page), nil
