@@ -78,6 +78,13 @@ func toAppUsers(users []userbus.User) []user {
 
 // =============================================================================
 
+type authenUser struct {
+	User  user   `json:"user"`
+	Token string `json:"token"`
+}
+
+// =============================================================================
+
 // registerUser defines the data needed to register a new user.
 type registerUser struct {
 	Name            string `json:"name" binding:"required"`
@@ -104,6 +111,14 @@ func toBusRegisterUser(app registerUser) (userbus.RegisterUser, error) {
 	}
 
 	return bus, nil
+}
+
+// =============================================================================
+
+// loginUser defines the data needed to login a user.
+type loginUser struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
 }
 
 // =============================================================================

@@ -164,7 +164,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	ginEngine := gin.New()
 	apiV1Router := ginEngine.Group(apiV1GroupName)
 	apiV1Router.Use(mid.Logging(log, []string{}), mid.Panic(log))
-	userapp.New(log, ath, userBus).Routes(apiV1Router)
+	userapp.New(log, ath, cfg.Auth.ActiveKID, userBus).Routes(apiV1Router)
 
 	// Construct API server
 	api := http.Server{

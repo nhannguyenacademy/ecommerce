@@ -10,20 +10,23 @@ import (
 )
 
 type app struct {
-	log     *logger.Logger
-	auth    *auth.Auth
-	userBus *userbus.Business
+	log       *logger.Logger
+	auth      *auth.Auth
+	activeKID string
+	userBus   *userbus.Business
 }
 
 func New(
 	log *logger.Logger,
 	auth *auth.Auth,
+	activeKID string,
 	userBus *userbus.Business,
 ) *app {
 	return &app{
-		log:     log,
-		auth:    auth,
-		userBus: userBus,
+		log:       log,
+		auth:      auth,
+		activeKID: activeKID,
+		userBus:   userBus,
 	}
 }
 
@@ -34,6 +37,8 @@ func (a *app) Routes(r gin.IRouter) {
 	ruleAuthorizeAdmin := mid.AuthorizeUser(a.log, a.auth, a.userBus, auth.Rules.Admin)
 
 	r.POST("/users/register", a.registerController)
+	r.POST("/users/login", a.loginController)
+
 	r.GET("/users", authen, ruleAdmin, a.queryController)
 	r.GET("/users/:user_id", authen, ruleAuthorizeUser, a.queryByIDController)
 	r.POST("/users", authen, ruleAdmin, a.createController)

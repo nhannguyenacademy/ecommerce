@@ -22,8 +22,8 @@ func (a *app) registerController(c *gin.Context) {
 		return
 	}
 
-	u, err := a.register(c.Request.Context(), ru)
-	response.Send(c, a.log, u, err)
+	usr, err := a.register(c.Request.Context(), ru)
+	response.Send(c, a.log, usr, err)
 }
 
 func (a *app) register(ctx context.Context, ru registerUser) (user, error) {
