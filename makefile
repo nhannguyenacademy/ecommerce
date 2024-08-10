@@ -136,7 +136,7 @@ admin-users:
 	export ECOMMERCE_DB_HOST=localhost; go run tools/admin/main.go users
 
 admin-gen-token:
-	export ECOMMERCE_DB_HOST=localhost; go run tools/admin/main.go gentoken 5cf37266-3473-4006-984f-9325122678b7 54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+	export ECOMMERCE_DB_HOST=localhost; go run tools/admin/main.go gentoken 97ee07e2-ebbb-4c69-a681-d5fe165c2cb9 54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
 # ==============================================================================
 # Metrics and Tracing
@@ -167,7 +167,7 @@ mock:
 
 token:
 	curl -il \
-	--user "admin@example.com:gophers" http://localhost:8080/api/v1/auth/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+	--user "admin@email.com:gophers" http://localhost:8080/api/v1/auth/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
 create-user:
 	curl -il -X POST \
@@ -187,7 +187,7 @@ load:
 otel-test:
 	curl -il \
 	-H "Traceparent: 00-918dd5ecf264712262b68cf2ef8b5239-896d90f23f69f006-01" \
-	--user "admin@example.com:gophers" http://localhost:8080/api/v1/users/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+	--user "admin@email.com:gophers" http://localhost:8080/api/v1/users/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
 # ==============================================================================
 # Modules support

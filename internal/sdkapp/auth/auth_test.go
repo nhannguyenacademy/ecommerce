@@ -40,7 +40,7 @@ func test1(ath *auth.Auth) func(t *testing.T) {
 		claims := auth.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				Subject:   "97ee07e2-ebbb-4c69-a681-d5fe165c2cb9",
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -83,7 +83,7 @@ func test2(ath *auth.Auth) func(t *testing.T) {
 		claims := auth.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				Subject:   "97ee07e2-ebbb-4c69-a681-d5fe165c2cb9",
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -131,7 +131,7 @@ func test3(ath *auth.Auth) func(t *testing.T) {
 		claims := auth.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				Subject:   "97ee07e2-ebbb-4c69-a681-d5fe165c2cb9",
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -164,7 +164,7 @@ func test4(ath *auth.Auth) func(t *testing.T) {
 		claims := auth.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				Subject:   "97ee07e2-ebbb-4c69-a681-d5fe165c2cb9",
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -196,7 +196,7 @@ func test5(ath *auth.Auth) func(t *testing.T) {
 		claims := auth.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				Subject:   "97ee07e2-ebbb-4c69-a681-d5fe165c2cb9",
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
@@ -228,7 +228,7 @@ func test6(ath *auth.Auth) func(t *testing.T) {
 		claims := auth.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
-				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
+				Subject:   "97ee07e2-ebbb-4c69-a681-d5fe165c2cb9",
 				ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Hour)),
 				IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			},
