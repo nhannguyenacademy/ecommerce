@@ -30,6 +30,7 @@ type Storer interface {
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, userID uuid.UUID) (User, error)
 	QueryByEmail(ctx context.Context, email mail.Address) (User, error)
+	QueryByEmailConfirmToken(ctx context.Context, token string) (User, error)
 }
 
 // Business manages the set of APIs for user access.

@@ -32,17 +32,16 @@ func (b *Business) Update(ctx context.Context, usr User, uu UpdateUser) (User, e
 	if uu.Enabled != nil {
 		usr.Enabled = *uu.Enabled
 	}
+
+	if uu.EmailConfirmToken != nil {
+		usr.EmailConfirmToken = *uu.EmailConfirmToken
+	}
+
 	usr.DateUpdated = time.Now()
 
 	if err := b.storer.Update(ctx, usr); err != nil {
 		return User{}, fmt.Errorf("update: %w", err)
 	}
-
-	// Other domains may need to know when a user is updated so business
-	// logic can be applieb. This represents a delegate call to other domains.
-	//if err := b.delegate.Call(ctx, ActionUpdatedData(uu, usr.ID)); err != nil {
-	//	return User{}, fmt.Errorf("failed to execute `%s` action: %w", ActionUpdated, err)
-	//}
 
 	return usr, nil
 }

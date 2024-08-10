@@ -24,6 +24,15 @@ type User struct {
 
 // =============================================================================
 
+// RegisterUser contains information needed to register a new user.
+type RegisterUser struct {
+	Name     Name
+	Email    mail.Address
+	Password string
+}
+
+// =============================================================================
+
 // NewUser contains information needed to create a new user.
 type NewUser struct {
 	Name     Name
@@ -36,9 +45,10 @@ type NewUser struct {
 
 // UpdateUser contains information needed to update a user.
 type UpdateUser struct {
-	Name     *Name
-	Email    *mail.Address
-	Roles    []Role
-	Password *string
-	Enabled  *bool
+	Name              *Name
+	Email             *mail.Address
+	Roles             []Role
+	Password          *string
+	Enabled           *bool
+	EmailConfirmToken *string
 }

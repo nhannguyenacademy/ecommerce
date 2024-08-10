@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// Create adds a new user to the system.
-func (b *Business) Create(ctx context.Context, nu NewUser) (User, error) {
+// Register a new user to the system.
+func (b *Business) Register(ctx context.Context, nu RegisterUser) (User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return User{}, fmt.Errorf("generatefrompassword: %w", err)
@@ -22,9 +22,9 @@ func (b *Business) Create(ctx context.Context, nu NewUser) (User, error) {
 		Name:              nu.Name,
 		Email:             nu.Email,
 		PasswordHash:      string(hash),
-		Roles:             nu.Roles,
+		Roles:             []Role{Roles.User},
 		Enabled:           true,
-		EmailConfirmToken: "",
+		EmailConfirmToken: uuid.NewString(),
 		DateCreated:       now,
 		DateUpdated:       now,
 	}
