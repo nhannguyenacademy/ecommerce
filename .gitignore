@@ -3,4 +3,3 @@ vendor
 cmd/ecommerce/ecommerce
 tools/admin/admin
 main
-deployments/compose/database-data
