@@ -111,7 +111,7 @@ compose-up:
 compose-build-up: build compose-up
 
 compose-down:
-	cd ./deployments/compose/ && docker compose -f docker_compose.yaml down
+	cd ./deployments/compose/ && docker compose -f docker_compose.yaml down -v
 
 compose-logs:
 	cd ./deployments/compose/ && docker compose -f docker_compose.yaml logs --follow

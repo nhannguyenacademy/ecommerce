@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/migrate"
 	"github.com/nhannguyenacademy/ecommerce/tools/admin/commands"
 	"io"
 	"os"
@@ -104,7 +105,7 @@ func processCommands(args conf.Args, log *logger.Logger, cfg config) error {
 		}
 
 	case "migrate-seed":
-		if err := commands.Migrate(dbConfig); err != nil {
+		if err := commands.Migrate(dbConfig); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 			return fmt.Errorf("migrating database: %w", err)
 		}
 		if err := commands.Seed(dbConfig); err != nil {

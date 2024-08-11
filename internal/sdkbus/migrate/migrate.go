@@ -25,6 +25,8 @@ var (
 	seedDoc string
 )
 
+var ErrNoChange = migrate.ErrNoChange
+
 // Migrate attempts to bring the database up to date with the migrations
 // defined in this package.
 func Migrate(ctx context.Context, db *sqlx.DB) error {
@@ -47,7 +49,14 @@ func Migrate(ctx context.Context, db *sqlx.DB) error {
 		return fmt.Errorf("construct migrate instance: %w", err)
 	}
 
-	return m.Up()
+	if err := m.Up(); err != nil {
+		if errors.Is(err, migrate.ErrNoChange) {
+			return ErrNoChange
+		}
+		return fmt.Errorf("migrate up: %w", err)
+	}
+
+	return nil
 }
 
 func MigrateDown(ctx context.Context, db *sqlx.DB) error {
