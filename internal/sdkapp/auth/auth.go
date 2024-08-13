@@ -135,8 +135,8 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 	}
 
 	// Check the database for this user to verify they are still enabled.
-	if err := a.isUserEnabled(ctx, claims); err != nil {
-		return Claims{}, fmt.Errorf("user not enabled : %w", err)
+	if err := a.isValidUser(ctx, claims); err != nil {
+		return Claims{}, fmt.Errorf("invalid user : %w", err)
 	}
 
 	return claims, nil
@@ -179,9 +179,9 @@ func (a *Auth) Authorize(_ context.Context, claims Claims, userID uuid.UUID, rul
 	return nil
 }
 
-// isUserEnabled hits the database and checks the user is not disabled. If the
-// no database connection was provided, this check is skipped.
-func (a *Auth) isUserEnabled(ctx context.Context, claims Claims) error {
+// isValidUser checks the user is still valid in the system: not disabled and email confirmed.
+// If userBus is not provided, we skip this check.
+func (a *Auth) isValidUser(ctx context.Context, claims Claims) error {
 	if a.userBus == nil {
 		return nil
 	}
@@ -198,6 +198,10 @@ func (a *Auth) isUserEnabled(ctx context.Context, claims Claims) error {
 
 	if !usr.Enabled {
 		return fmt.Errorf("user disabled")
+	}
+
+	if usr.EmailConfirmToken != "" {
+		return fmt.Errorf("user not confirm email")
 	}
 
 	return nil

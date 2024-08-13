@@ -167,7 +167,7 @@ mock:
 
 token:
 	curl -il \
-	--user "admin@email.com:gophers" http://localhost:8080/api/v1/auth/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+	--user "admin@email.com:abc123" http://localhost:8080/api/v1/auth/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
 create-user:
 	curl -il -X POST \
@@ -187,7 +187,7 @@ load:
 otel-test:
 	curl -il \
 	-H "Traceparent: 00-918dd5ecf264712262b68cf2ef8b5239-896d90f23f69f006-01" \
-	--user "admin@email.com:gophers" http://localhost:8080/api/v1/users/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
+	--user "admin@email.com:abc123" http://localhost:8080/api/v1/users/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1
 
 # ==============================================================================
 # Modules support

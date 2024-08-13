@@ -44,26 +44,28 @@ func parseQueryParams(r *http.Request) queryParams {
 
 // user represents information about an individual user.
 type user struct {
-	ID           string   `json:"id"`
-	Name         string   `json:"name"`
-	Email        string   `json:"email"`
-	Roles        []string `json:"roles"`
-	PasswordHash string   `json:"-"`
-	Enabled      bool     `json:"enabled"`
-	DateCreated  string   `json:"dateCreated"`
-	DateUpdated  string   `json:"dateUpdated"`
+	ID                string   `json:"id"`
+	Name              string   `json:"name"`
+	Email             string   `json:"email"`
+	Roles             []string `json:"roles"`
+	PasswordHash      string   `json:"-"`
+	Enabled           bool     `json:"-"`
+	EmailConfirmToken string   `json:"-"`
+	DateCreated       string   `json:"date_created"`
+	DateUpdated       string   `json:"date_updated"`
 }
 
 func toAppUser(bus userbus.User) user {
 	return user{
-		ID:           bus.ID.String(),
-		Name:         bus.Name.String(),
-		Email:        bus.Email.Address,
-		Roles:        userbus.ParseRolesToString(bus.Roles),
-		PasswordHash: bus.PasswordHash,
-		Enabled:      bus.Enabled,
-		DateCreated:  bus.DateCreated.Format(time.RFC3339),
-		DateUpdated:  bus.DateUpdated.Format(time.RFC3339),
+		ID:                bus.ID.String(),
+		Name:              bus.Name.String(),
+		Email:             bus.Email.Address,
+		Roles:             userbus.ParseRolesToString(bus.Roles),
+		PasswordHash:      bus.PasswordHash,
+		Enabled:           bus.Enabled,
+		EmailConfirmToken: bus.EmailConfirmToken,
+		DateCreated:       bus.DateCreated.Format(time.RFC3339),
+		DateUpdated:       bus.DateUpdated.Format(time.RFC3339),
 	}
 }
 
@@ -90,7 +92,7 @@ type registerUser struct {
 	Name            string `json:"name" binding:"required"`
 	Email           string `json:"email" binding:"required,email"`
 	Password        string `json:"password" binding:"required"`
-	PasswordConfirm string `json:"passwordConfirm" binding:"eqfield=Password"`
+	PasswordConfirm string `json:"password_confirm" binding:"eqfield=Password"`
 }
 
 func toBusRegisterUser(app registerUser) (userbus.RegisterUser, error) {
@@ -129,7 +131,7 @@ type newUser struct {
 	Email           string   `json:"email" binding:"required,email"`
 	Roles           []string `json:"roles" binding:"required"`
 	Password        string   `json:"password" binding:"required"`
-	PasswordConfirm string   `json:"passwordConfirm" binding:"eqfield=Password"`
+	PasswordConfirm string   `json:"password_confirm" binding:"eqfield=Password"`
 }
 
 func toBusNewUser(app newUser) (userbus.NewUser, error) {
@@ -165,7 +167,7 @@ type updateUser struct {
 	Name            *string `json:"name"`
 	Email           *string `json:"email" validate:"omitempty,email"`
 	Password        *string `json:"password"`
-	PasswordConfirm *string `json:"passwordConfirm" validate:"omitempty,eqfield=Password"`
+	PasswordConfirm *string `json:"password_confirm" validate:"omitempty,eqfield=Password"`
 	Enabled         *bool   `json:"enabled"`
 }
 

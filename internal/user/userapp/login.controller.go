@@ -44,6 +44,10 @@ func (a *app) login(ctx context.Context, lu loginUser) (authenUser, error) {
 		return authenUser{}, errs.New(errs.Internal, err)
 	}
 
+	if !usr.Enabled || usr.EmailConfirmToken != "" {
+		return authenUser{}, errs.New(errs.Unauthenticated, errors.New("invalid user"))
+	}
+
 	claims := auth.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   usr.ID.String(),

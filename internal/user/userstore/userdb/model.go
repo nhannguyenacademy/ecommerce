@@ -3,6 +3,7 @@ package userdb
 import (
 	"fmt"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb/dbarray"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 	"net/mail"
 	"time"
@@ -11,15 +12,15 @@ import (
 )
 
 type user struct {
-	ID                uuid.UUID                `db:"user_id"`
-	Name              string                   `db:"name"`
-	Email             string                   `db:"email"`
-	Roles             pgtype.FlatArray[string] `db:"roles"`
-	PasswordHash      string                   `db:"password_hash"`
-	Enabled           bool                     `db:"enabled"`
-	EmailConfirmToken pgtype.Text              `db:"email_confirm_token"`
-	DateCreated       time.Time                `db:"date_created"`
-	DateUpdated       time.Time                `db:"date_updated"`
+	ID                uuid.UUID      `db:"user_id"`
+	Name              string         `db:"name"`
+	Email             string         `db:"email"`
+	Roles             dbarray.String `db:"roles"`
+	PasswordHash      string         `db:"password_hash"`
+	Enabled           bool           `db:"enabled"`
+	EmailConfirmToken pgtype.Text    `db:"email_confirm_token"`
+	DateCreated       time.Time      `db:"date_created"`
+	DateUpdated       time.Time      `db:"date_updated"`
 }
 
 func toDBUser(bus userbus.User) user {

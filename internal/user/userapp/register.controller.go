@@ -26,6 +26,7 @@ func (a *app) registerController(c *gin.Context) {
 	response.Send(c, a.log, usr, err)
 }
 
+// todo: send email confirmation
 func (a *app) register(ctx context.Context, ru registerUser) (user, error) {
 	bru, err := toBusRegisterUser(ru)
 	if err != nil {
