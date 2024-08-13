@@ -52,7 +52,7 @@ func (a *app) login(ctx context.Context, lu loginUser) (authenUser, error) {
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   usr.ID.String(),
 			Issuer:    a.auth.Issuer(),
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(8760 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(365 * 24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		},
 		Roles: userbus.ParseRolesToString(usr.Roles),

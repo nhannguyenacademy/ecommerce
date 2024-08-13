@@ -165,22 +165,11 @@ func toBusNewUser(app newUser) (userbus.NewUser, error) {
 // updateUser defines the data needed to update a user.
 type updateUser struct {
 	Name            *string `json:"name"`
-	Email           *string `json:"email" validate:"omitempty,email"`
 	Password        *string `json:"password"`
-	PasswordConfirm *string `json:"password_confirm" validate:"omitempty,eqfield=Password"`
-	Enabled         *bool   `json:"enabled"`
+	PasswordConfirm *string `json:"password_confirm" binding:"omitempty,eqfield=Password"`
 }
 
 func toBusUpdateUser(app updateUser) (userbus.UpdateUser, error) {
-	var addr *mail.Address
-	if app.Email != nil {
-		var err error
-		addr, err = mail.ParseAddress(*app.Email)
-		if err != nil {
-			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
-		}
-	}
-
 	var name *userbus.Name
 	if app.Name != nil {
 		nm, err := userbus.ParseName(*app.Name)
@@ -192,9 +181,7 @@ func toBusUpdateUser(app updateUser) (userbus.UpdateUser, error) {
 
 	bus := userbus.UpdateUser{
 		Name:     name,
-		Email:    addr,
 		Password: app.Password,
-		Enabled:  app.Enabled,
 	}
 
 	return bus, nil
