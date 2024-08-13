@@ -120,13 +120,6 @@ func processCommands(args conf.Args, log *logger.Logger, cfg config) error {
 			return fmt.Errorf("adding user: %w", err)
 		}
 
-	case "users":
-		pageNumber := args.Num(1)
-		rowsPerPage := args.Num(2)
-		if err := commands.Users(log, dbConfig, pageNumber, rowsPerPage); err != nil {
-			return fmt.Errorf("getting users: %w", err)
-		}
-
 	case "genkey":
 		if err := commands.GenKey(); err != nil {
 			return fmt.Errorf("key generation: %w", err)

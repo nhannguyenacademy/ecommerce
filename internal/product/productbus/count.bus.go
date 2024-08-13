@@ -1,4 +1,4 @@
-package userbus
+package productbus
 
 import "context"
 

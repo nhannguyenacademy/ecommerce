@@ -1,12 +1,44 @@
-package userapp
+package productapp
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
+	"net/http"
 	"net/mail"
 	"time"
 )
+
+// =============================================================================
+// Query params
+
+// queryParams represents the set of possible query strings.
+type queryParams struct {
+	Page             string
+	Rows             string
+	OrderBy          string
+	ID               string
+	Name             string
+	Email            string
+	StartCreatedDate string
+	EndCreatedDate   string
+}
+
+func parseQueryParams(r *http.Request) queryParams {
+	values := r.URL.Query()
+
+	filter := queryParams{
+		Page:             values.Get("page"),
+		Rows:             values.Get("row"),
+		OrderBy:          values.Get("orderBy"),
+		ID:               values.Get("user_id"),
+		Name:             values.Get("name"),
+		Email:            values.Get("email"),
+		StartCreatedDate: values.Get("start_created_date"),
+		EndCreatedDate:   values.Get("end_created_date"),
+	}
+
+	return filter
+}
 
 // =============================================================================
 
@@ -37,6 +69,15 @@ func toAppUser(bus userbus.User) user {
 	}
 }
 
+func toAppUsers(users []userbus.User) []user {
+	app := make([]user, len(users))
+	for i, usr := range users {
+		app[i] = toAppUser(usr)
+	}
+
+	return app
+}
+
 // =============================================================================
 
 type authenUser struct {
@@ -54,23 +95,21 @@ type registerUser struct {
 	PasswordConfirm string `json:"password_confirm" binding:"eqfield=Password"`
 }
 
-func toBusRegisterUser(app registerUser) (userbus.NewUser, error) {
+func toBusRegisterUser(app registerUser) (userbus.RegisterUser, error) {
 	addr, err := mail.ParseAddress(app.Email)
 	if err != nil {
-		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
+		return userbus.RegisterUser{}, fmt.Errorf("parse: %w", err)
 	}
 
 	name, err := userbus.ParseName(app.Name)
 	if err != nil {
-		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
+		return userbus.RegisterUser{}, fmt.Errorf("parse: %w", err)
 	}
 
-	bus := userbus.NewUser{
-		Name:              name,
-		Email:             *addr,
-		Password:          app.Password,
-		Roles:             []userbus.Role{userbus.Roles.User},
-		EmailConfirmToken: uuid.NewString(),
+	bus := userbus.RegisterUser{
+		Name:     name,
+		Email:    *addr,
+		Password: app.Password,
 	}
 
 	return bus, nil
@@ -82,6 +121,43 @@ func toBusRegisterUser(app registerUser) (userbus.NewUser, error) {
 type loginUser struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
+}
+
+// =============================================================================
+
+// newUser defines the data needed to add a new user.
+type newUser struct {
+	Name            string   `json:"name" binding:"required"`
+	Email           string   `json:"email" binding:"required,email"`
+	Roles           []string `json:"roles" binding:"required"`
+	Password        string   `json:"password" binding:"required"`
+	PasswordConfirm string   `json:"password_confirm" binding:"eqfield=Password"`
+}
+
+func toBusNewUser(app newUser) (userbus.NewUser, error) {
+	roles, err := userbus.ParseRoles(app.Roles)
+	if err != nil {
+		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
+	}
+
+	addr, err := mail.ParseAddress(app.Email)
+	if err != nil {
+		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
+	}
+
+	name, err := userbus.ParseName(app.Name)
+	if err != nil {
+		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
+	}
+
+	bus := userbus.NewUser{
+		Name:     name,
+		Email:    *addr,
+		Roles:    roles,
+		Password: app.Password,
+	}
+
+	return bus, nil
 }
 
 // =============================================================================

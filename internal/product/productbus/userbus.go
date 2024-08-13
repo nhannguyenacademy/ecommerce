@@ -1,10 +1,12 @@
 // Package userbus provides business access to user domain.
-package userbus
+package productbus
 
 import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"net/mail"
@@ -23,6 +25,9 @@ type Storer interface {
 	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
 	Create(ctx context.Context, usr User) error
 	Update(ctx context.Context, usr User) error
+	Delete(ctx context.Context, usr User) error
+	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]User, error)
+	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, userID uuid.UUID) (User, error)
 	QueryByEmail(ctx context.Context, email mail.Address) (User, error)
 	QueryByEmailConfirmToken(ctx context.Context, token string) (User, error)

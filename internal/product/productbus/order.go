@@ -1,4 +1,4 @@
-package userbus
+package productbus
 
 import "github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
 

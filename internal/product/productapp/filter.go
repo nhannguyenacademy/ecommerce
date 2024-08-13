@@ -1,4 +1,4 @@
-package userapp
+package productapp
 
 import (
 	"github.com/google/uuid"

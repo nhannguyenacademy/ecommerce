@@ -22,24 +22,25 @@ func (a *app) registerController(c *gin.Context) {
 		return
 	}
 
-	usr, err := a.register(c.Request.Context(), ru)
-	response.Send(c, a.log, usr, err)
+	err := a.register(c.Request.Context(), ru)
+	response.Send(c, a.log, nil, err)
 }
 
-// todo: send email confirmation
-func (a *app) register(ctx context.Context, ru registerUser) (user, error) {
-	bru, err := toBusRegisterUser(ru)
+func (a *app) register(ctx context.Context, ru registerUser) error {
+	nu, err := toBusRegisterUser(ru)
 	if err != nil {
-		return user{}, errs.New(errs.InvalidArgument, err)
+		return errs.New(errs.InvalidArgument, err)
 	}
 
-	usr, err := a.userBus.Register(ctx, bru)
+	usr, err := a.userBus.Create(ctx, nu)
 	if err != nil {
 		if errors.Is(err, userbus.ErrUniqueEmail) {
-			return user{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
+			return errs.New(errs.Aborted, userbus.ErrUniqueEmail)
 		}
-		return user{}, errs.Newf(errs.Internal, "register: usr[%+v]: %s", usr, err)
+		return errs.Newf(errs.Internal, "register: usr[%+v]: %s", usr, err)
 	}
 
-	return toAppUser(usr), nil
+	// todo: send email confirmation
+
+	return nil
 }

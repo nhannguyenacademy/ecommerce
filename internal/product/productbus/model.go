@@ -1,4 +1,4 @@
-package userbus
+package productbus
 
 import (
 	"net/mail"
@@ -24,13 +24,21 @@ type User struct {
 
 // =============================================================================
 
+// RegisterUser contains information needed to register a new user.
+type RegisterUser struct {
+	Name     Name
+	Email    mail.Address
+	Password string
+}
+
+// =============================================================================
+
 // NewUser contains information needed to create a new user.
 type NewUser struct {
-	Name              Name
-	Email             mail.Address
-	Roles             []Role
-	Password          string
-	EmailConfirmToken string
+	Name     Name
+	Email    mail.Address
+	Roles    []Role
+	Password string
 }
 
 // =============================================================================

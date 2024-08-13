@@ -1,4 +1,4 @@
-package userbus
+package productbus
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// Register a new user to the system.
-func (b *Business) Register(ctx context.Context, nu RegisterUser) (User, error) {
+// Create adds a new user to the system.
+func (b *Business) Create(ctx context.Context, nu NewUser) (User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return User{}, fmt.Errorf("generatefrompassword: %w", err)
@@ -22,9 +22,9 @@ func (b *Business) Register(ctx context.Context, nu RegisterUser) (User, error) 
 		Name:              nu.Name,
 		Email:             nu.Email,
 		PasswordHash:      string(hash),
-		Roles:             []Role{Roles.User},
+		Roles:             nu.Roles,
 		Enabled:           true,
-		EmailConfirmToken: uuid.NewString(),
+		EmailConfirmToken: "",
 		DateCreated:       now,
 		DateUpdated:       now,
 	}
