@@ -1,8 +1,8 @@
 package userdb
 
 import (
+	"database/sql"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb/dbarray"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 	"net/mail"
@@ -18,7 +18,7 @@ type user struct {
 	Roles             dbarray.String `db:"roles"`
 	PasswordHash      string         `db:"password_hash"`
 	Enabled           bool           `db:"enabled"`
-	EmailConfirmToken pgtype.Text    `db:"email_confirm_token"`
+	EmailConfirmToken sql.NullString `db:"email_confirm_token"`
 	DateCreated       time.Time      `db:"date_created"`
 	DateUpdated       time.Time      `db:"date_updated"`
 }
@@ -31,7 +31,7 @@ func toDBUser(bus userbus.User) user {
 		Roles:             userbus.ParseRolesToString(bus.Roles),
 		PasswordHash:      bus.PasswordHash,
 		Enabled:           bus.Enabled,
-		EmailConfirmToken: pgtype.Text{String: bus.EmailConfirmToken, Valid: bus.EmailConfirmToken != ""},
+		EmailConfirmToken: sql.NullString{String: bus.EmailConfirmToken, Valid: bus.EmailConfirmToken != ""},
 		DateCreated:       bus.DateCreated.UTC(),
 		DateUpdated:       bus.DateUpdated.UTC(),
 	}

@@ -1,44 +1,27 @@
 package productapp
 
 import (
-	"github.com/google/uuid"
+	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
-	"net/mail"
+	"strconv"
 	"time"
 )
 
-func parseFilter(qp queryParams) (userbus.QueryFilter, error) {
-	var filter userbus.QueryFilter
-
-	if qp.ID != "" {
-		id, err := uuid.Parse(qp.ID)
-		if err != nil {
-			return userbus.QueryFilter{}, errs.NewFieldsError("user_id", err)
-		}
-		filter.ID = &id
-	}
+func parseFilter(qp queryParams) (productbus.QueryFilter, error) {
+	var filter productbus.QueryFilter
 
 	if qp.Name != "" {
-		name, err := userbus.ParseName(qp.Name)
+		name, err := productbus.ParseName(qp.Name)
 		if err != nil {
-			return userbus.QueryFilter{}, errs.NewFieldsError("name", err)
+			return productbus.QueryFilter{}, errs.NewFieldsError("name", err)
 		}
 		filter.Name = &name
-	}
-
-	if qp.Email != "" {
-		addr, err := mail.ParseAddress(qp.Email)
-		if err != nil {
-			return userbus.QueryFilter{}, errs.NewFieldsError("email", err)
-		}
-		filter.Email = addr
 	}
 
 	if qp.StartCreatedDate != "" {
 		t, err := time.Parse(time.RFC3339, qp.StartCreatedDate)
 		if err != nil {
-			return userbus.QueryFilter{}, errs.NewFieldsError("start_created_date", err)
+			return productbus.QueryFilter{}, errs.NewFieldsError("start_created_date", err)
 		}
 		filter.StartCreatedDate = &t
 	}
@@ -46,9 +29,25 @@ func parseFilter(qp queryParams) (userbus.QueryFilter, error) {
 	if qp.EndCreatedDate != "" {
 		t, err := time.Parse(time.RFC3339, qp.EndCreatedDate)
 		if err != nil {
-			return userbus.QueryFilter{}, errs.NewFieldsError("end_created_date", err)
+			return productbus.QueryFilter{}, errs.NewFieldsError("end_created_date", err)
 		}
 		filter.EndCreatedDate = &t
+	}
+
+	if qp.StartPrice != "" {
+		startPrice, err := strconv.ParseInt(qp.StartPrice, 10, 64)
+		if err != nil {
+			return productbus.QueryFilter{}, errs.NewFieldsError("start_price", err)
+		}
+		filter.StartPrice = &startPrice
+	}
+
+	if qp.EndPrice != "" {
+		endPrice, err := strconv.ParseInt(qp.EndPrice, 10, 64)
+		if err != nil {
+			return productbus.QueryFilter{}, errs.NewFieldsError("end_price", err)
+		}
+		filter.EndPrice = &endPrice
 	}
 
 	return filter, nil

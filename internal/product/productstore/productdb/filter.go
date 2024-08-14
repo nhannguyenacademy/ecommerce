@@ -1,28 +1,18 @@
-package userdb
+package productdb
 
 import (
 	"bytes"
 	"fmt"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
 	"strings"
 )
 
-func applyFilter(filter userbus.QueryFilter, data map[string]any, buf *bytes.Buffer) {
+func applyFilter(filter productbus.QueryFilter, data map[string]any, buf *bytes.Buffer) {
 	var wc []string
-
-	if filter.ID != nil {
-		data["user_id"] = *filter.ID
-		wc = append(wc, "user_id = :user_id")
-	}
 
 	if filter.Name != nil {
 		data["name"] = fmt.Sprintf("%%%s%%", *filter.Name)
 		wc = append(wc, "name LIKE :name")
-	}
-
-	if filter.Email != nil {
-		data["email"] = (*filter.Email).String()
-		wc = append(wc, "email = :email")
 	}
 
 	if filter.StartCreatedDate != nil {
@@ -33,6 +23,16 @@ func applyFilter(filter userbus.QueryFilter, data map[string]any, buf *bytes.Buf
 	if filter.EndCreatedDate != nil {
 		data["end_date_created"] = filter.EndCreatedDate.UTC()
 		wc = append(wc, "date_created <= :end_date_created")
+	}
+
+	if filter.StartPrice != nil {
+		data["start_price"] = filter.StartPrice
+		wc = append(wc, "price >= :start_price")
+	}
+
+	if filter.EndPrice != nil {
+		data["end_price"] = filter.EndPrice
+		wc = append(wc, "price <= :end_price")
 	}
 
 	if len(wc) > 0 {

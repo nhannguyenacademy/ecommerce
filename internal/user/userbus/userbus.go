@@ -17,8 +17,7 @@ var (
 	ErrAuthenticationFailure = errors.New("authentication failed")
 )
 
-// Storer interface declares the behavior this package needs to perists and
-// retrieve data.
+// Storer interface declares the behavior this package needs to perists and retrieve data.
 type Storer interface {
 	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
 	Create(ctx context.Context, usr User) error
@@ -45,8 +44,7 @@ func NewBusiness(
 	}
 }
 
-// NewWithTx constructs a new business value that will use the
-// specified transaction in any store related calls.
+// NewWithTx constructs a new business value that will use the specified transaction in any store related calls.
 func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
 	storer, err := b.storer.NewWithTx(tx)
 	if err != nil {

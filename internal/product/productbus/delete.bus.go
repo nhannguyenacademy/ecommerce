@@ -5,9 +5,9 @@ import (
 	"fmt"
 )
 
-// Delete removes the specified user.
-func (b *Business) Delete(ctx context.Context, usr User) error {
-	if err := b.storer.Delete(ctx, usr); err != nil {
+// Delete removes the specified product.
+func (b *Business) Delete(ctx context.Context, prd Product) error {
+	if err := b.storer.Delete(ctx, prd); err != nil {
 		return fmt.Errorf("delete: %w", err)
 	}
 

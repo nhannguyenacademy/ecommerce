@@ -1,7 +1,7 @@
 package productbus
 
 import (
-	"net/mail"
+	"net/url"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,46 +9,36 @@ import (
 
 // =============================================================================
 
-// User represents information about an individual user.
-type User struct {
-	ID                uuid.UUID
-	Name              Name
-	Email             mail.Address
-	Roles             []Role
-	PasswordHash      string
-	Enabled           bool
-	EmailConfirmToken string
-	DateCreated       time.Time
-	DateUpdated       time.Time
+// Product represents information about an individual product.
+type Product struct {
+	ID          uuid.UUID
+	Name        Name
+	Description string
+	ImageURL    url.URL
+	Price       int64
+	Quantity    int32
+	DateCreated time.Time
+	DateUpdated time.Time
 }
 
 // =============================================================================
 
-// RegisterUser contains information needed to register a new user.
-type RegisterUser struct {
-	Name     Name
-	Email    mail.Address
-	Password string
+// NewProduct contains information needed to create a new product.
+type NewProduct struct {
+	Name        Name
+	Description string
+	ImageURL    url.URL
+	Price       int64
+	Quantity    int32
 }
 
 // =============================================================================
 
-// NewUser contains information needed to create a new user.
-type NewUser struct {
-	Name     Name
-	Email    mail.Address
-	Roles    []Role
-	Password string
-}
-
-// =============================================================================
-
-// UpdateUser contains information needed to update a user.
-type UpdateUser struct {
-	Name              *Name
-	Email             *mail.Address
-	Roles             []Role
-	Password          *string
-	Enabled           *bool
-	EmailConfirmToken *string
+// UpdateProduct contains information needed to update a product.
+type UpdateProduct struct {
+	Name        *Name
+	Description *string
+	ImageURL    *url.URL
+	Price       *int64
+	Quantity    *int32
 }

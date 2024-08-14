@@ -11,8 +11,8 @@ import (
 )
 
 func (a *app) createController(c *gin.Context) {
-	var nu newUser
-	if err := c.ShouldBindJSON(&nu); err != nil {
+	var np newProduct
+	if err := c.ShouldBindJSON(&np); err != nil {
 		var vErrs validator.ValidationErrors
 		if errors.As(err, &vErrs) {
 			err = errs.Newf(errs.InvalidArgument, "%s", vErrs)
@@ -22,23 +22,23 @@ func (a *app) createController(c *gin.Context) {
 		return
 	}
 
-	u, err := a.create(c.Request.Context(), nu)
+	u, err := a.create(c.Request.Context(), np)
 	response.Send(c, a.log, u, err)
 }
 
-func (a *app) create(ctx context.Context, app newUser) (user, error) {
-	nc, err := toBusNewUser(app)
+func (a *app) create(ctx context.Context, app newProduct) (product, error) {
+	nc, err := toBusNewProduct(app)
 	if err != nil {
-		return user{}, errs.New(errs.InvalidArgument, err)
+		return product{}, errs.New(errs.InvalidArgument, err)
 	}
 
-	usr, err := a.userBus.Create(ctx, nc)
+	prd, err := a.productBus.Create(ctx, nc)
 	if err != nil {
 		if errors.Is(err, userbus.ErrUniqueEmail) {
-			return user{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
+			return product{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
 		}
-		return user{}, errs.Newf(errs.Internal, "create: usr[%+v]: %s", usr, err)
+		return product{}, errs.Newf(errs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
 
-	return toAppUser(usr), nil
+	return toAppProduct(prd), nil
 }

@@ -3,45 +3,36 @@ package productbus
 import (
 	"context"
 	"fmt"
-	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
-// Update modifies information about a user.
-func (b *Business) Update(ctx context.Context, usr User, uu UpdateUser) (User, error) {
+// Update modifies information about a product.
+func (b *Business) Update(ctx context.Context, prd Product, uu UpdateProduct) (Product, error) {
 	if uu.Name != nil {
-		usr.Name = *uu.Name
+		prd.Name = *uu.Name
 	}
 
-	if uu.Email != nil {
-		usr.Email = *uu.Email
+	if uu.Description != nil {
+		prd.Description = *uu.Description
 	}
 
-	if uu.Roles != nil {
-		usr.Roles = uu.Roles
+	if uu.ImageURL != nil {
+		prd.ImageURL = *uu.ImageURL
 	}
 
-	if uu.Password != nil {
-		pw, err := bcrypt.GenerateFromPassword([]byte(*uu.Password), bcrypt.DefaultCost)
-		if err != nil {
-			return User{}, fmt.Errorf("generatefrompassword: %w", err)
-		}
-		usr.PasswordHash = string(pw)
+	if uu.Price != nil {
+		prd.Price = *uu.Price
 	}
 
-	if uu.Enabled != nil {
-		usr.Enabled = *uu.Enabled
+	if uu.Quantity != nil {
+		prd.Quantity = *uu.Quantity
 	}
 
-	if uu.EmailConfirmToken != nil {
-		usr.EmailConfirmToken = *uu.EmailConfirmToken
+	prd.DateUpdated = time.Now()
+
+	if err := b.storer.Update(ctx, prd); err != nil {
+		return Product{}, fmt.Errorf("update: %w", err)
 	}
 
-	usr.DateUpdated = time.Now()
-
-	if err := b.storer.Update(ctx, usr); err != nil {
-		return User{}, fmt.Errorf("update: %w", err)
-	}
-
-	return usr, nil
+	return prd, nil
 }

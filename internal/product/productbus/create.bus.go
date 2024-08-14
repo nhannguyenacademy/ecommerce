@@ -4,34 +4,27 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
-// Create adds a new user to the system.
-func (b *Business) Create(ctx context.Context, nu NewUser) (User, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return User{}, fmt.Errorf("generatefrompassword: %w", err)
-	}
-
+// Create adds a new product to the system.
+func (b *Business) Create(ctx context.Context, np NewProduct) (Product, error) {
 	now := time.Now()
 
-	usr := User{
-		ID:                uuid.New(),
-		Name:              nu.Name,
-		Email:             nu.Email,
-		PasswordHash:      string(hash),
-		Roles:             nu.Roles,
-		Enabled:           true,
-		EmailConfirmToken: "",
-		DateCreated:       now,
-		DateUpdated:       now,
+	prd := Product{
+		ID:          uuid.New(),
+		Name:        np.Name,
+		Description: np.Description,
+		ImageURL:    np.ImageURL,
+		Price:       np.Price,
+		Quantity:    np.Quantity,
+		DateCreated: now,
+		DateUpdated: now,
 	}
 
-	if err := b.storer.Create(ctx, usr); err != nil {
-		return User{}, fmt.Errorf("create: %w", err)
+	if err := b.storer.Create(ctx, prd); err != nil {
+		return Product{}, fmt.Errorf("create: %w", err)
 	}
 
-	return usr, nil
+	return prd, nil
 }

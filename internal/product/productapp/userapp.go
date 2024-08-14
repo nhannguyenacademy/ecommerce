@@ -1,29 +1,26 @@
-// Package userapp maintains the app layer api for the user domain.
+// Package productapp maintains the app layer api for the product domain.
 package productapp
 
 import (
+	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
 
 type app struct {
-	log       *logger.Logger
-	auth      *auth.Auth
-	activeKID string
-	userBus   *userbus.Business
+	log        *logger.Logger
+	auth       *auth.Auth
+	productBus *productbus.Business
 }
 
 func New(
 	log *logger.Logger,
 	auth *auth.Auth,
-	activeKID string,
-	userBus *userbus.Business,
+	productBus *productbus.Business,
 ) *app {
 	return &app{
-		log:       log,
-		auth:      auth,
-		activeKID: activeKID,
-		userBus:   userBus,
+		log:        log,
+		auth:       auth,
+		productBus: productBus,
 	}
 }

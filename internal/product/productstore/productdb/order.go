@@ -1,17 +1,16 @@
-package userdb
+package productdb
 
 import (
 	"fmt"
+	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 )
 
 var orderByFields = map[string]string{
-	userbus.OrderByID:      "user_id",
-	userbus.OrderByName:    "name",
-	userbus.OrderByEmail:   "email",
-	userbus.OrderByRoles:   "roles",
-	userbus.OrderByEnabled: "enabled",
+	productbus.OrderByDateCreated: "user_id",
+	productbus.OrderByName:        "name",
+	productbus.OrderByPrice:       "price",
+	productbus.OrderByQuantity:    "quantity",
 }
 
 func orderByClause(orderBy order.By) (string, error) {

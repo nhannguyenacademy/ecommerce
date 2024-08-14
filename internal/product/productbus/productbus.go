@@ -1,4 +1,4 @@
-// Package userbus provides business access to user domain.
+// Package productbus provides business access to product domain.
 package productbus
 
 import (
@@ -9,28 +9,23 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
-	"net/mail"
 )
 
 // Set of error variables for CRUD operations.
+
 var (
-	ErrNotFound              = errors.New("user not found")
-	ErrUniqueEmail           = errors.New("email is not unique")
-	ErrAuthenticationFailure = errors.New("authentication failed")
+	ErrNotFound = errors.New("product not found")
 )
 
-// Storer interface declares the behavior this package needs to perists and
-// retrieve data.
+// Storer interface declares the behavior this package needs to perists and retrieve data.
 type Storer interface {
 	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
-	Create(ctx context.Context, usr User) error
-	Update(ctx context.Context, usr User) error
-	Delete(ctx context.Context, usr User) error
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]User, error)
+	Create(ctx context.Context, prd Product) error
+	Update(ctx context.Context, prd Product) error
+	Delete(ctx context.Context, prd Product) error
+	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Product, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
-	QueryByID(ctx context.Context, userID uuid.UUID) (User, error)
-	QueryByEmail(ctx context.Context, email mail.Address) (User, error)
-	QueryByEmailConfirmToken(ctx context.Context, token string) (User, error)
+	QueryByID(ctx context.Context, prdID uuid.UUID) (Product, error)
 }
 
 // Business manages the set of APIs for user access.
@@ -39,7 +34,7 @@ type Business struct {
 	storer Storer
 }
 
-// NewBusiness constructs a user business API for use.
+// NewBusiness constructs a business API for use.
 func NewBusiness(
 	log *logger.Logger,
 	storer Storer,
@@ -50,8 +45,7 @@ func NewBusiness(
 	}
 }
 
-// NewWithTx constructs a new business value that will use the
-// specified transaction in any store related calls.
+// NewWithTx constructs a new business value that will use the specified transaction in any store related calls.
 func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
 	storer, err := b.storer.NewWithTx(tx)
 	if err != nil {

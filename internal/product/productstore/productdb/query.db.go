@@ -1,17 +1,17 @@
-package userdb
+package productdb
 
 import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 )
 
-// Query retrieves a list of existing users from the database.
-func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy order.By, page page.Page) ([]userbus.User, error) {
+// Query retrieves a list of existing products from the database.
+func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderBy order.By, page page.Page) ([]productbus.Product, error) {
 	data := map[string]any{
 		"offset":        (page.Number() - 1) * page.RowsPerPage(),
 		"rows_per_page": page.RowsPerPage(),
@@ -19,9 +19,9 @@ func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy o
 
 	const q = `
 	SELECT
-		user_id, name, email, password_hash, roles, enabled, email_confirm_token, date_created, date_updated
+		product_id, name, description, image_url, price, quantity, date_created, date_updated
 	FROM
-		users`
+		products`
 
 	buf := bytes.NewBufferString(q)
 	applyFilter(filter, data, buf)
@@ -34,10 +34,10 @@ func (s *Store) Query(ctx context.Context, filter userbus.QueryFilter, orderBy o
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dbUsrs []user
-	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbUsrs); err != nil {
+	var dbPrds []product
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbPrds); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toBusUsers(dbUsrs)
+	return toBusProducts(dbPrds)
 }

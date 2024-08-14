@@ -5,13 +5,14 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
+	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/response"
 )
 
 func (a *app) updateController(c *gin.Context) {
-	var uu updateUser
+	var uu updateProduct
 	if err := c.ShouldBindJSON(&uu); err != nil {
 		var vErrs validator.ValidationErrors
 		if errors.As(err, &vErrs) {
@@ -22,25 +23,33 @@ func (a *app) updateController(c *gin.Context) {
 		return
 	}
 
-	u, err := a.update(c.Request.Context(), uu)
+	u, err := a.update(c.Request.Context(), uu, c.Param("product_id"))
 	response.Send(c, a.log, u, err)
 }
 
-func (a *app) update(ctx context.Context, app updateUser) (user, error) {
-	uu, err := toBusUpdateUser(app)
+func (a *app) update(ctx context.Context, app updateProduct, id string) (product, error) {
+	up, err := toBusUpdateProduct(app)
 	if err != nil {
-		return user{}, errs.New(errs.InvalidArgument, err)
+		return product{}, errs.New(errs.InvalidArgument, err)
 	}
 
-	usr, err := mid.GetUser(ctx)
+	prdID, err := uuid.Parse(id)
 	if err != nil {
-		return user{}, errs.Newf(errs.Internal, "user missing in context: %s", err)
+		return product{}, errs.Newf(errs.InvalidArgument, "invalid product id: %s", err)
 	}
 
-	updUsr, err := a.userBus.Update(ctx, usr, uu)
+	prd, err := a.productBus.QueryByID(ctx, prdID)
 	if err != nil {
-		return user{}, errs.Newf(errs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err)
+		if errors.Is(err, productbus.ErrNotFound) {
+			return product{}, errs.Newf(errs.NotFound, "querybyid: %s", err)
+		}
+		return product{}, errs.Newf(errs.Internal, "querybyid: %s", err)
 	}
 
-	return toAppUser(updUsr), nil
+	updPrd, err := a.productBus.Update(ctx, prd, up)
+	if err != nil {
+		return product{}, errs.Newf(errs.Internal, "update: prdID[%s] up[%+v]: %s", prd.ID, up, err)
+	}
+
+	return toAppProduct(updPrd), nil
 }

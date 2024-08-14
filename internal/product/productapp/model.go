@@ -2,9 +2,9 @@ package productapp
 
 import (
 	"fmt"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
 	"net/http"
-	"net/mail"
+	"net/url"
 	"time"
 )
 
@@ -16,11 +16,11 @@ type queryParams struct {
 	Page             string
 	Rows             string
 	OrderBy          string
-	ID               string
 	Name             string
-	Email            string
 	StartCreatedDate string
 	EndCreatedDate   string
+	StartPrice       string
+	EndPrice         string
 }
 
 func parseQueryParams(r *http.Request) queryParams {
@@ -30,11 +30,11 @@ func parseQueryParams(r *http.Request) queryParams {
 		Page:             values.Get("page"),
 		Rows:             values.Get("row"),
 		OrderBy:          values.Get("orderBy"),
-		ID:               values.Get("user_id"),
 		Name:             values.Get("name"),
-		Email:            values.Get("email"),
 		StartCreatedDate: values.Get("start_created_date"),
 		EndCreatedDate:   values.Get("end_created_date"),
+		StartPrice:       values.Get("start_price"),
+		EndPrice:         values.Get("end_price"),
 	}
 
 	return filter
@@ -42,37 +42,35 @@ func parseQueryParams(r *http.Request) queryParams {
 
 // =============================================================================
 
-// user represents information about an individual user.
-type user struct {
-	ID                string   `json:"id"`
-	Name              string   `json:"name"`
-	Email             string   `json:"email"`
-	Roles             []string `json:"roles"`
-	PasswordHash      string   `json:"-"`
-	Enabled           bool     `json:"-"`
-	EmailConfirmToken string   `json:"-"`
-	DateCreated       string   `json:"date_created"`
-	DateUpdated       string   `json:"date_updated"`
+// product represents information about an individual product.
+type product struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	ImageURL    string `json:"image_url"`
+	Price       int64  `json:"price"`
+	Quantity    int32  `json:"quantity"`
+	DateCreated string `json:"date_created"`
+	DateUpdated string `json:"date_updated"`
 }
 
-func toAppUser(bus userbus.User) user {
-	return user{
-		ID:                bus.ID.String(),
-		Name:              bus.Name.String(),
-		Email:             bus.Email.Address,
-		Roles:             userbus.ParseRolesToString(bus.Roles),
-		PasswordHash:      bus.PasswordHash,
-		Enabled:           bus.Enabled,
-		EmailConfirmToken: bus.EmailConfirmToken,
-		DateCreated:       bus.DateCreated.Format(time.RFC3339),
-		DateUpdated:       bus.DateUpdated.Format(time.RFC3339),
+func toAppProduct(bus productbus.Product) product {
+	return product{
+		ID:          bus.ID.String(),
+		Name:        bus.Name.String(),
+		Description: bus.Description,
+		ImageURL:    bus.ImageURL.String(),
+		Price:       bus.Price,
+		Quantity:    bus.Quantity,
+		DateCreated: bus.DateCreated.Format(time.RFC3339),
+		DateUpdated: bus.DateUpdated.Format(time.RFC3339),
 	}
 }
 
-func toAppUsers(users []userbus.User) []user {
-	app := make([]user, len(users))
-	for i, usr := range users {
-		app[i] = toAppUser(usr)
+func toAppProducts(prds []productbus.Product) []product {
+	app := make([]product, len(prds))
+	for i, usr := range prds {
+		app[i] = toAppProduct(usr)
 	}
 
 	return app
@@ -80,36 +78,31 @@ func toAppUsers(users []userbus.User) []user {
 
 // =============================================================================
 
-type authenUser struct {
-	UserID string `json:"user_id"`
-	Token  string `json:"token"`
+type newProduct struct {
+	Name        string `json:"name" binding:"required"`
+	Description string `json:"description"`
+	ImageURL    string `json:"image_url" binding:"omitempty,url"`
+	Price       int64  `json:"price" binding:"required,gte=0"`
+	Quantity    int32  `json:"quantity" binding:"required,gte=1"`
 }
 
-// =============================================================================
-
-// registerUser defines the data needed to register a new user.
-type registerUser struct {
-	Name            string `json:"name" binding:"required"`
-	Email           string `json:"email" binding:"required,email"`
-	Password        string `json:"password" binding:"required"`
-	PasswordConfirm string `json:"password_confirm" binding:"eqfield=Password"`
-}
-
-func toBusRegisterUser(app registerUser) (userbus.RegisterUser, error) {
-	addr, err := mail.ParseAddress(app.Email)
+func toBusNewProduct(app newProduct) (productbus.NewProduct, error) {
+	imageURL, err := url.Parse(app.ImageURL)
 	if err != nil {
-		return userbus.RegisterUser{}, fmt.Errorf("parse: %w", err)
+		return productbus.NewProduct{}, fmt.Errorf("parse: %w", err)
 	}
 
-	name, err := userbus.ParseName(app.Name)
+	name, err := productbus.ParseName(app.Name)
 	if err != nil {
-		return userbus.RegisterUser{}, fmt.Errorf("parse: %w", err)
+		return productbus.NewProduct{}, fmt.Errorf("parse: %w", err)
 	}
 
-	bus := userbus.RegisterUser{
-		Name:     name,
-		Email:    *addr,
-		Password: app.Password,
+	bus := productbus.NewProduct{
+		Name:        name,
+		Description: app.Description,
+		ImageURL:    *imageURL,
+		Price:       app.Price,
+		Quantity:    app.Quantity,
 	}
 
 	return bus, nil
@@ -117,71 +110,39 @@ func toBusRegisterUser(app registerUser) (userbus.RegisterUser, error) {
 
 // =============================================================================
 
-// loginUser defines the data needed to login a user.
-type loginUser struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
+type updateProduct struct {
+	Name        *string `json:"name" binding:"required"`
+	Description *string `json:"description"`
+	ImageURL    *string `json:"image_url" binding:"omitempty,url"`
+	Price       *int64  `json:"price" binding:"required,gte=0"`
+	Quantity    *int32  `json:"quantity" binding:"required,gte=1"`
 }
 
-// =============================================================================
-
-// newUser defines the data needed to add a new user.
-type newUser struct {
-	Name            string   `json:"name" binding:"required"`
-	Email           string   `json:"email" binding:"required,email"`
-	Roles           []string `json:"roles" binding:"required"`
-	Password        string   `json:"password" binding:"required"`
-	PasswordConfirm string   `json:"password_confirm" binding:"eqfield=Password"`
-}
-
-func toBusNewUser(app newUser) (userbus.NewUser, error) {
-	roles, err := userbus.ParseRoles(app.Roles)
-	if err != nil {
-		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
-	}
-
-	addr, err := mail.ParseAddress(app.Email)
-	if err != nil {
-		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
-	}
-
-	name, err := userbus.ParseName(app.Name)
-	if err != nil {
-		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
-	}
-
-	bus := userbus.NewUser{
-		Name:     name,
-		Email:    *addr,
-		Roles:    roles,
-		Password: app.Password,
-	}
-
-	return bus, nil
-}
-
-// =============================================================================
-
-// updateUser defines the data needed to update a user.
-type updateUser struct {
-	Name            *string `json:"name"`
-	Password        *string `json:"password"`
-	PasswordConfirm *string `json:"password_confirm" binding:"omitempty,eqfield=Password"`
-}
-
-func toBusUpdateUser(app updateUser) (userbus.UpdateUser, error) {
-	var name *userbus.Name
+func toBusUpdateProduct(app updateProduct) (productbus.UpdateProduct, error) {
+	var name *productbus.Name
 	if app.Name != nil {
-		nm, err := userbus.ParseName(*app.Name)
+		nm, err := productbus.ParseName(*app.Name)
 		if err != nil {
-			return userbus.UpdateUser{}, fmt.Errorf("parse: %w", err)
+			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
 		}
 		name = &nm
 	}
 
-	bus := userbus.UpdateUser{
-		Name:     name,
-		Password: app.Password,
+	var imageURL *url.URL
+	if app.ImageURL != nil {
+		imgURL, err := url.Parse(*app.ImageURL)
+		if err != nil {
+			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
+		}
+		imageURL = imgURL
+	}
+
+	bus := productbus.UpdateProduct{
+		Name:        name,
+		Description: app.Description,
+		ImageURL:    imageURL,
+		Price:       app.Price,
+		Quantity:    app.Quantity,
 	}
 
 	return bus, nil

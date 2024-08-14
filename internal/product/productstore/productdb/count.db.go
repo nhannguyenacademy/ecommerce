@@ -1,22 +1,22 @@
-package userdb
+package productdb
 
 import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 )
 
-// Count returns the total number of users in the DB.
-func (s *Store) Count(ctx context.Context, filter userbus.QueryFilter) (int, error) {
+// Count returns the total number of products in the DB.
+func (s *Store) Count(ctx context.Context, filter productbus.QueryFilter) (int, error) {
 	data := map[string]any{}
 
 	const q = `
 	SELECT
 		count(1)
 	FROM
-		users`
+		products`
 
 	buf := bytes.NewBufferString(q)
 	applyFilter(filter, data, buf)

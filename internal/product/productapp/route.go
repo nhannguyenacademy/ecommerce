@@ -8,11 +8,11 @@ import (
 
 func (a *app) Routes(r gin.IRouter) {
 	authenticate := mid.Authenticate(a.log, a.auth)
-	authorizeUser := mid.AuthorizeUser(a.log, a.auth, a.userBus, auth.Rules.User)
+	authorizeAdmin := mid.Authorize(a.log, a.auth, auth.Rules.Admin)
 
-	r.POST("/users/register", a.registerController)
-	r.POST("/users/login", a.loginController)
-	r.GET("/users/confirm-email/:confirm_token", a.confirmEmailController)
-	r.PUT("/users/:user_id", authenticate, authorizeUser, a.updateController)
-	r.GET("/users/:user_id", authenticate, authorizeUser, a.queryByIDController)
+	r.GET("/products", a.queryController)
+	r.GET("/products/:product_id", a.queryByIDController)
+	r.POST("/products", authenticate, authorizeAdmin, a.createController)
+	r.PUT("/products/:product_id", authenticate, authorizeAdmin, a.updateController)
+	r.DELETE("/products/:product_id", authenticate, authorizeAdmin, a.deleteController)
 }
