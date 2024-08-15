@@ -58,7 +58,7 @@ func Parse(fieldMappings map[string]string, orderBy string, defaultOrder By) (By
 		return NewBy(fieldName, ASC), nil
 
 	case 2:
-		direction := strings.TrimSpace(orderParts[1])
+		direction := strings.ToUpper(strings.TrimSpace(orderParts[1]))
 		if _, exists := directions[direction]; !exists {
 			return By{}, fmt.Errorf("unknown direction: %s", direction)
 		}

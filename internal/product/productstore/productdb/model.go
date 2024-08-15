@@ -56,8 +56,8 @@ func toBusProduct(db product) (productbus.Product, error) {
 		ImageURL:    imageURL,
 		Price:       db.Price,
 		Quantity:    db.Quantity,
-		DateCreated: db.DateCreated.In(time.Local),
-		DateUpdated: db.DateUpdated.In(time.Local),
+		DateCreated: db.DateCreated.UTC(),
+		DateUpdated: db.DateUpdated.UTC(),
 	}
 
 	return bus, nil

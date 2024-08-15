@@ -159,6 +159,10 @@ func (fe FieldErrors) Fields() map[string]string {
 	return m
 }
 
+func (fe FieldErrors) HTTPStatus() int {
+	return httpStatus[InvalidArgument]
+}
+
 // IsFieldErrors checks if an error of type FieldErrors exists.
 func IsFieldErrors(err error) bool {
 	var fe FieldErrors

@@ -40,5 +40,7 @@ func (a *app) create(ctx context.Context, app newProduct) (product, error) {
 		return product{}, errs.Newf(errs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
 
+	// todo: upload image to s3
+
 	return toAppProduct(prd), nil
 }

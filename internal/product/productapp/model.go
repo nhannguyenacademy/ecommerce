@@ -29,7 +29,7 @@ func parseQueryParams(r *http.Request) queryParams {
 	filter := queryParams{
 		Page:             values.Get("page"),
 		Rows:             values.Get("row"),
-		OrderBy:          values.Get("orderBy"),
+		OrderBy:          values.Get("order_by"),
 		Name:             values.Get("name"),
 		StartCreatedDate: values.Get("start_created_date"),
 		EndCreatedDate:   values.Get("end_created_date"),
@@ -82,7 +82,7 @@ type newProduct struct {
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
 	ImageURL    string `json:"image_url" binding:"omitempty,url"`
-	Price       int64  `json:"price" binding:"required,gte=0"`
+	Price       int64  `json:"price" binding:"required,gte=1"`
 	Quantity    int32  `json:"quantity" binding:"required,gte=1"`
 }
 
@@ -111,11 +111,11 @@ func toBusNewProduct(app newProduct) (productbus.NewProduct, error) {
 // =============================================================================
 
 type updateProduct struct {
-	Name        *string `json:"name" binding:"required"`
+	Name        *string `json:"name"`
 	Description *string `json:"description"`
 	ImageURL    *string `json:"image_url" binding:"omitempty,url"`
-	Price       *int64  `json:"price" binding:"required,gte=0"`
-	Quantity    *int32  `json:"quantity" binding:"required,gte=1"`
+	Price       *int64  `json:"price" binding:"omitempty,gte=1"`
+	Quantity    *int32  `json:"quantity" binding:"omitempty,gte=1"`
 }
 
 func toBusUpdateProduct(app updateProduct) (productbus.UpdateProduct, error) {

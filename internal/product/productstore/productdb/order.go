@@ -7,7 +7,7 @@ import (
 )
 
 var orderByFields = map[string]string{
-	productbus.OrderByDateCreated: "user_id",
+	productbus.OrderByDateCreated: "date_created",
 	productbus.OrderByName:        "name",
 	productbus.OrderByPrice:       "price",
 	productbus.OrderByQuantity:    "quantity",

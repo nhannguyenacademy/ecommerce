@@ -60,8 +60,8 @@ func toBusUser(db user) (userbus.User, error) {
 		PasswordHash:      db.PasswordHash,
 		Enabled:           db.Enabled,
 		EmailConfirmToken: db.EmailConfirmToken.String,
-		DateCreated:       db.DateCreated.In(time.Local),
-		DateUpdated:       db.DateUpdated.In(time.Local),
+		DateCreated:       db.DateCreated.UTC(),
+		DateUpdated:       db.DateUpdated.UTC(),
 	}
 
 	return bus, nil
