@@ -11,8 +11,8 @@ import (
 )
 
 func (a *app) registerController(c *gin.Context) {
-	var ru registerUser
-	if err := c.ShouldBindJSON(&ru); err != nil {
+	var req registerUser
+	if err := c.ShouldBindJSON(&req); err != nil {
 		var vErrs validator.ValidationErrors
 		if errors.As(err, &vErrs) {
 			err = errs.Newf(errs.InvalidArgument, "%s", vErrs)
@@ -22,12 +22,12 @@ func (a *app) registerController(c *gin.Context) {
 		return
 	}
 
-	err := a.register(c.Request.Context(), ru)
+	err := a.register(c.Request.Context(), req)
 	response.Send(c, a.log, nil, err)
 }
 
-func (a *app) register(ctx context.Context, ru registerUser) error {
-	nu, err := toBusRegisterUser(ru)
+func (a *app) register(ctx context.Context, req registerUser) error {
+	nu, err := toBusRegisterUser(req)
 	if err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}

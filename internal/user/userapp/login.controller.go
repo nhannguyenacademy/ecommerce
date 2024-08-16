@@ -30,13 +30,13 @@ func (a *app) loginController(c *gin.Context) {
 	response.Send(c, a.log, usr, err)
 }
 
-func (a *app) login(ctx context.Context, lu loginUser) (authenUser, error) {
-	addr, err := mail.ParseAddress(lu.Email)
+func (a *app) login(ctx context.Context, req loginUser) (authenUser, error) {
+	addr, err := mail.ParseAddress(req.Email)
 	if err != nil {
 		return authenUser{}, errs.New(errs.InvalidArgument, err)
 	}
 
-	usr, err := a.userBus.Authenticate(ctx, *addr, lu.Password)
+	usr, err := a.userBus.Authenticate(ctx, *addr, req.Password)
 	if err != nil {
 		if errors.Is(err, userbus.ErrAuthenticationFailure) {
 			return authenUser{}, errs.New(errs.Unauthenticated, err)

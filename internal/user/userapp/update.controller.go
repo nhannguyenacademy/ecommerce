@@ -11,8 +11,8 @@ import (
 )
 
 func (a *app) updateController(c *gin.Context) {
-	var uu updateUser
-	if err := c.ShouldBindJSON(&uu); err != nil {
+	var req updateUser
+	if err := c.ShouldBindJSON(&req); err != nil {
 		var vErrs validator.ValidationErrors
 		if errors.As(err, &vErrs) {
 			err = errs.Newf(errs.InvalidArgument, "%s", vErrs)
@@ -22,12 +22,12 @@ func (a *app) updateController(c *gin.Context) {
 		return
 	}
 
-	u, err := a.update(c.Request.Context(), uu)
+	u, err := a.update(c.Request.Context(), req)
 	response.Send(c, a.log, u, err)
 }
 
-func (a *app) update(ctx context.Context, app updateUser) (user, error) {
-	uu, err := toBusUpdateUser(app)
+func (a *app) update(ctx context.Context, req updateUser) (user, error) {
+	uu, err := toBusUpdateUser(req)
 	if err != nil {
 		return user{}, errs.New(errs.InvalidArgument, err)
 	}
