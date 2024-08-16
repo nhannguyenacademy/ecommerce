@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS orders (
   PRIMARY KEY (order_id)
 );
 
-ALTER TABLE orders ADD FOREIGN KEY (user_id) REFERENCES users (user_id);
+ALTER TABLE orders ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users (user_id);
 
 -- order_items table ---------------------------------------------------
 CREATE TABLE IF NOT EXISTS order_items (
@@ -56,9 +56,9 @@ CREATE INDEX product_id_index ON order_items (product_id);
 
 CREATE INDEX order_id_index ON order_items (order_id);
 
-ALTER TABLE order_items ADD FOREIGN KEY (order_id) REFERENCES orders (order_id);
+ALTER TABLE order_items ADD CONSTRAINT fk_order_id FOREIGN KEY (order_id) REFERENCES orders (order_id);
 
-ALTER TABLE order_items ADD FOREIGN KEY (product_id) REFERENCES products (product_id);
+ALTER TABLE order_items ADD CONSTRAINT fk_product_id FOREIGN KEY (product_id) REFERENCES products (product_id);
 
 -- payments table ---------------------------------------------------
 CREATE TABLE IF NOT EXISTS payments (
@@ -82,4 +82,4 @@ CREATE INDEX partner_transaction_id_index ON payments (partner_transaction_id);
 
 CREATE INDEX order_id_status_index ON payments (order_id, status);
 
-ALTER TABLE payments ADD FOREIGN KEY (order_id) REFERENCES orders (order_id);
+ALTER TABLE payments ADD CONSTRAINT fk_order_id FOREIGN KEY (order_id) REFERENCES orders (order_id);
