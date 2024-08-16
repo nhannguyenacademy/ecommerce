@@ -9,10 +9,10 @@ import (
 
 // Query retrieves a list of existing products.
 func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Product, error) {
-	users, err := b.storer.Query(ctx, filter, orderBy, page)
+	prds, err := b.storer.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
 
-	return users, nil
+	return prds, nil
 }

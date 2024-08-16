@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS orders (
   amount        BIGINT      NOT NULL,
   status        TEXT        NOT NULL,
   date_created  TIMESTAMP   NOT NULL,
+  date_updated  TIMESTAMP   NOT NULL,
 
   PRIMARY KEY (order_id)
 );
@@ -48,6 +49,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   price             BIGINT      NOT NULL,
   quantity          INT         NOT NULL,
   date_created      TIMESTAMP   NOT NULL,
+  date_updated      TIMESTAMP   NOT NULL,
 
   PRIMARY KEY (order_item_id)
 );
@@ -70,6 +72,7 @@ CREATE TABLE IF NOT EXISTS payments (
   status                    TEXT        NOT NULL,
   currency                  TEXT        NOT NULL,
   date_created              TIMESTAMP   NOT NULL,
+  date_updated              TIMESTAMP   NOT NULL,
 
   PRIMARY KEY (payment_id)
 );

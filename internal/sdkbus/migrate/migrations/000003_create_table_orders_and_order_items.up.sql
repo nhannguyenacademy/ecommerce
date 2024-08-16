@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS order_items (
     price             BIGINT      NOT NULL,
     quantity          INT         NOT NULL,
     date_created      TIMESTAMP   NOT NULL,
+    date_updated      TIMESTAMP   NOT NULL,
 
     PRIMARY KEY (order_item_id)
 );

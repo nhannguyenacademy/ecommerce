@@ -1,7 +1,6 @@
 package orderbus
 
 import (
-	"net/url"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,12 +8,22 @@ import (
 
 // =============================================================================
 
-// Product represents information about an individual product.
-type Product struct {
+type Order struct {
 	ID          uuid.UUID
-	Name        Name
-	Description string
-	ImageURL    url.URL
+	UserID      uuid.UUID
+	Amount      int64
+	Status      Status
+	DateCreated time.Time
+	DateUpdated time.Time
+	Items       []OrderItem
+}
+
+// =============================================================================
+
+type OrderItem struct {
+	ID          uuid.UUID
+	OrderID     uuid.UUID
+	ProductID   uuid.UUID
 	Price       int64
 	Quantity    int32
 	DateCreated time.Time
@@ -23,22 +32,15 @@ type Product struct {
 
 // =============================================================================
 
-// NewProduct contains information needed to create a new product.
-type NewProduct struct {
-	Name        Name
-	Description string
-	ImageURL    url.URL
-	Price       int64
-	Quantity    int32
+type NewOrder struct {
+	UserID uuid.UUID
+	Items  []NewOrderItem
 }
 
 // =============================================================================
 
-// UpdateProduct contains information needed to update a product.
-type UpdateProduct struct {
-	Name        *Name
-	Description *string
-	ImageURL    *url.URL
-	Price       *int64
-	Quantity    *int32
+type NewOrderItem struct {
+	OrderID   uuid.UUID
+	ProductID uuid.UUID
+	Quantity  int32
 }

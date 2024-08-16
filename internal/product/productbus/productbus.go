@@ -26,9 +26,9 @@ type Storer interface {
 	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Product, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, prdID uuid.UUID) (Product, error)
+	QueryByIDs(ctx context.Context, prdIDs []uuid.UUID) ([]Product, error)
 }
 
-// Business manages the set of APIs for user access.
 type Business struct {
 	log    *logger.Logger
 	storer Storer

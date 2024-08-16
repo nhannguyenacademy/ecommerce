@@ -6,12 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
-// QueryByID finds the user by the specified ID.
-func (b *Business) QueryByID(ctx context.Context, prdID uuid.UUID) (Product, error) {
-	user, err := b.storer.QueryByID(ctx, prdID)
+func (b *Business) QueryByID(ctx context.Context, ordID uuid.UUID) (Order, error) {
+	ord, err := b.storer.QueryByID(ctx, ordID)
 	if err != nil {
-		return Product{}, fmt.Errorf("query: prdID[%s]: %w", prdID, err)
+		return Order{}, fmt.Errorf("query: ordID[%s]: %w", ordID, err)
 	}
 
-	return user, nil
+	return ord, nil
 }

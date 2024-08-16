@@ -1,4 +1,4 @@
-// Package productdb contains user related CRUD functionality.
+// Package productdb contains product related CRUD functionality.
 package productdb
 
 import (
@@ -8,7 +8,7 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
 
-// Store manages the set of APIs for user database access.
+// Store manages the set of APIs for database access.
 type Store struct {
 	log *logger.Logger
 	db  sqlx.ExtContext
@@ -24,7 +24,6 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 
 // NewWithTx constructs a new Store value replacing the sqlx DB
 // value with a sqlx DB value that is currently inside a transaction.
-// todo: check why return an interface (check in user module also)
 func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (productbus.Storer, error) {
 	ec, err := sqldb.GetExtContext(tx)
 	if err != nil {

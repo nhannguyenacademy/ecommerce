@@ -7,7 +7,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/response"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 )
 
 func (a *app) createController(c *gin.Context) {
@@ -34,9 +33,6 @@ func (a *app) create(ctx context.Context, req newProduct) (product, error) {
 
 	prd, err := a.productBus.Create(ctx, nc)
 	if err != nil {
-		if errors.Is(err, userbus.ErrUniqueEmail) {
-			return product{}, errs.New(errs.Aborted, userbus.ErrUniqueEmail)
-		}
 		return product{}, errs.Newf(errs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
 
