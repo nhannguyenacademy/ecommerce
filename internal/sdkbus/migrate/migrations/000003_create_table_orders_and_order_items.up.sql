@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS orders (
     amount        BIGINT      NOT NULL,
     status        TEXT        NOT NULL,
     date_created  TIMESTAMP   NOT NULL,
+    date_updated  TIMESTAMP   NOT NULL,
 
     PRIMARY KEY (order_id)
 );

@@ -23,7 +23,7 @@ var (
 type Storer interface {
 	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
 	Create(ctx context.Context, ord Order) error
-	UpdateStatus(ctx context.Context, ord Order, status Status) error // todo: check current status and update new status in the same transaction
+	UpdateStatus(ctx context.Context, ord Order, status Status) error
 	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Order, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, ordID uuid.UUID) (Order, error)

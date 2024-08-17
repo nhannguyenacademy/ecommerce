@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 )
 
@@ -15,6 +16,7 @@ const (
 	claimKey ctxKey = iota + 1
 	userIDKey
 	userKey
+	trKey
 )
 
 func setClaims(ctx context.Context, claims auth.Claims) context.Context {
@@ -53,6 +55,20 @@ func GetUser(ctx context.Context) (userbus.User, error) {
 	v, ok := ctx.Value(userKey).(userbus.User)
 	if !ok {
 		return userbus.User{}, errors.New("user not found in context")
+	}
+
+	return v, nil
+}
+
+func setTran(ctx context.Context, tx sqldb.CommitRollbacker) context.Context {
+	return context.WithValue(ctx, trKey, tx)
+}
+
+// GetTran retrieves the value that can manage a transaction.
+func GetTran(ctx context.Context) (sqldb.CommitRollbacker, error) {
+	v, ok := ctx.Value(trKey).(sqldb.CommitRollbacker)
+	if !ok {
+		return nil, errors.New("transaction not found in context")
 	}
 
 	return v, nil

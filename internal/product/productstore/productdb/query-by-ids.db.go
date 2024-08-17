@@ -20,10 +20,13 @@ func (s *Store) QueryByIDs(ctx context.Context, prdIDs []uuid.UUID) ([]productbu
 	FROM
 		products
 	WHERE 
-		product_id IN (?)`
+		product_id IN (:product_ids)`
 
+	inData := map[string]any{
+		"product_ids": prdIDs,
+	}
 	var dbPrds []product
-	if err := sqldb.NamedQuerySliceUsingIn(ctx, s.log, s.db, q, ids, &dbPrds); err != nil {
+	if err := sqldb.NamedQuerySliceUsingIn(ctx, s.log, s.db, q, inData, &dbPrds); err != nil {
 		return nil, fmt.Errorf("db: %w", err)
 	}
 
