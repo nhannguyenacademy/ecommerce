@@ -23,23 +23,23 @@ func (a *app) updateController(c *gin.Context) {
 		return
 	}
 
-	uu, err := toBusUpdateUser(req)
-	if err != nil {
-		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
-		return
-	}
-
 	usr, err := mid.GetUser(ctx)
 	if err != nil {
 		respond.Error(c, a.log, errs.Newf(errs.Internal, "user missing in context: %s", err))
 		return
 	}
 
-	updUsr, err := a.userBus.Update(ctx, usr, uu)
+	input, err := toBusUpdateUser(req)
 	if err != nil {
-		respond.Error(c, a.log, errs.Newf(errs.Internal, "update: userID[%s] uu[%+v]: %s", usr.ID, uu, err))
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
 		return
 	}
 
-	respond.Success(c, a.log, toAppUser(updUsr))
+	output, err := a.userBus.Update(ctx, usr, input)
+	if err != nil {
+		respond.Error(c, a.log, errs.Newf(errs.Internal, "update: userID[%s] req[%+v]: %s", usr.ID, req, err))
+		return
+	}
+
+	respond.Success(c, a.log, toAppUser(output))
 }

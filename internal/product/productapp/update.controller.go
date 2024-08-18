@@ -24,19 +24,13 @@ func (a *app) updateController(c *gin.Context) {
 		return
 	}
 
-	up, err := toBusUpdateProduct(req)
-	if err != nil {
-		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
-		return
-	}
-
-	prdID, err := uuid.Parse(c.Param("product_id"))
+	id, err := uuid.Parse(c.Param("product_id"))
 	if err != nil {
 		respond.Error(c, a.log, errs.Newf(errs.InvalidArgument, "invalid product id: %s", err))
 		return
 	}
 
-	prd, err := a.productBus.QueryByID(ctx, prdID)
+	prd, err := a.productBus.QueryByID(ctx, id)
 	if err != nil {
 		var appErr *errs.Error
 		if errors.Is(err, productbus.ErrNotFound) {
@@ -48,11 +42,17 @@ func (a *app) updateController(c *gin.Context) {
 		return
 	}
 
-	updPrd, err := a.productBus.Update(ctx, prd, up)
+	input, err := toBusUpdateProduct(req)
 	if err != nil {
-		respond.Error(c, a.log, errs.Newf(errs.Internal, "update: prdID[%s] up[%+v]: %s", prd.ID, up, err))
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
 		return
 	}
 
-	respond.Success(c, a.log, toAppProduct(updPrd))
+	output, err := a.productBus.Update(ctx, prd, input)
+	if err != nil {
+		respond.Error(c, a.log, errs.Newf(errs.Internal, "update: id[%s] req[%+v]: %s", prd.ID, req, err))
+		return
+	}
+
+	respond.Success(c, a.log, toAppProduct(output))
 }

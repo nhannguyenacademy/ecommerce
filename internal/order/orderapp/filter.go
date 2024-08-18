@@ -1,9 +1,9 @@
 package orderapp
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/nhannguyenacademy/ecommerce/internal/order/orderbus"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"time"
 )
 
@@ -13,7 +13,7 @@ func parseFilter(qp queryParams) (orderbus.QueryFilter, error) {
 	if qp.StartCreatedDate != "" {
 		t, err := time.Parse(time.RFC3339, qp.StartCreatedDate)
 		if err != nil {
-			return orderbus.QueryFilter{}, errs.NewFieldsError("start_created_date", err)
+			return orderbus.QueryFilter{}, fmt.Errorf("parse start_created_date: %w", err)
 		}
 		filter.StartCreatedDate = &t
 	}
@@ -21,7 +21,7 @@ func parseFilter(qp queryParams) (orderbus.QueryFilter, error) {
 	if qp.EndCreatedDate != "" {
 		t, err := time.Parse(time.RFC3339, qp.EndCreatedDate)
 		if err != nil {
-			return orderbus.QueryFilter{}, errs.NewFieldsError("end_created_date", err)
+			return orderbus.QueryFilter{}, fmt.Errorf("parse end_created_date: %w", err)
 		}
 		filter.EndCreatedDate = &t
 	}
@@ -29,7 +29,7 @@ func parseFilter(qp queryParams) (orderbus.QueryFilter, error) {
 	if qp.UserID != "" {
 		id, err := uuid.Parse(qp.UserID)
 		if err != nil {
-			return orderbus.QueryFilter{}, errs.NewFieldsError("user_id", err)
+			return orderbus.QueryFilter{}, fmt.Errorf("parse user_id: %w", err)
 		}
 		filter.UserID = &id
 	}
@@ -37,7 +37,7 @@ func parseFilter(qp queryParams) (orderbus.QueryFilter, error) {
 	if qp.Status != "" {
 		status, err := orderbus.ParseStatus(qp.Status)
 		if err != nil {
-			return orderbus.QueryFilter{}, errs.NewFieldsError("status", err)
+			return orderbus.QueryFilter{}, fmt.Errorf("parse status: %w", err)
 		}
 		filter.Status = &status
 	}

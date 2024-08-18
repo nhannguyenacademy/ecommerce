@@ -29,23 +29,23 @@ func (a *app) createController(c *gin.Context) {
 		return
 	}
 
-	no, err := toBusNewOrder(req)
+	input, err := toBusNewOrder(req)
 	if err != nil {
 		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
 		return
 	}
 
-	ord, err := a.orderBus.Create(ctx, no)
+	output, err := a.orderBus.Create(ctx, input)
 	if err != nil {
 		var appErr *errs.Error
 		if errors.Is(err, orderbus.ErrMissingProducts) {
 			appErr = errs.New(errs.InvalidArgument, orderbus.ErrMissingProducts)
 		} else {
-			appErr = errs.Newf(errs.Internal, "create: ord[%+v]: %s", ord, err)
+			appErr = errs.Newf(errs.Internal, "create: req[%+v]: %s", req, err)
 		}
 		respond.Error(c, a.log, appErr)
 		return
 	}
 
-	respond.Success(c, a.log, toAppOrder(ord))
+	respond.Success(c, a.log, toAppOrder(output))
 }

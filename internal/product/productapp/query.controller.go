@@ -15,23 +15,23 @@ func (a *app) queryController(c *gin.Context) {
 
 	page, err := page.Parse(qp.Page, qp.Rows)
 	if err != nil {
-		respond.Error(c, a.log, errs.NewFieldsError("page", err))
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
 		return
 	}
 
 	filter, err := parseFilter(qp)
 	if err != nil {
-		respond.Error(c, a.log, errs.NewFieldsError("filter", err))
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
 		return
 	}
 
 	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
 	if err != nil {
-		respond.Error(c, a.log, errs.NewFieldsError("order", err))
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
 		return
 	}
 
-	prds, err := a.productBus.Query(ctx, filter, orderBy, page)
+	output, err := a.productBus.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		respond.Error(c, a.log, errs.Newf(errs.Internal, "query: %s", err))
 		return
@@ -43,5 +43,5 @@ func (a *app) queryController(c *gin.Context) {
 		return
 	}
 
-	respond.Success(c, a.log, query.NewResult(toAppProducts(prds), total, page))
+	respond.Success(c, a.log, query.NewResult(toAppProducts(output), total, page))
 }

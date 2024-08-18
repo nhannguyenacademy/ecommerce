@@ -12,13 +12,13 @@ import (
 func (a *app) deleteController(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	prdID, err := uuid.Parse(c.Param("product_id"))
+	id, err := uuid.Parse(c.Param("product_id"))
 	if err != nil {
 		respond.Error(c, a.log, errs.Newf(errs.InvalidArgument, "invalid product id: %s", err))
 		return
 	}
 
-	prd, err := a.productBus.QueryByID(ctx, prdID)
+	prd, err := a.productBus.QueryByID(ctx, id)
 	if err != nil {
 		var appErr *errs.Error
 		if errors.Is(err, productbus.ErrNotFound) {
@@ -31,7 +31,7 @@ func (a *app) deleteController(c *gin.Context) {
 	}
 
 	if err := a.productBus.Delete(ctx, prd); err != nil {
-		respond.Error(c, a.log, errs.Newf(errs.Internal, "delete: prdID[%s]: %s", prd.ID, err))
+		respond.Error(c, a.log, errs.Newf(errs.Internal, "delete: id[%s]: %s", prd.ID, err))
 		return
 	}
 

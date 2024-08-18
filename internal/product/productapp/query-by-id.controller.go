@@ -10,17 +10,17 @@ import (
 func (a *app) queryByIDController(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	prdID, err := uuid.Parse(c.Param("product_id"))
+	id, err := uuid.Parse(c.Param("product_id"))
 	if err != nil {
 		respond.Error(c, a.log, errs.Newf(errs.InvalidArgument, "invalid product id: %s", err))
 		return
 	}
 
-	prd, err := a.productBus.QueryByID(ctx, prdID)
+	output, err := a.productBus.QueryByID(ctx, id)
 	if err != nil {
 		respond.Error(c, a.log, errs.Newf(errs.Internal, "querybyid: %s", err))
 		return
 	}
 
-	respond.Success(c, a.log, toAppProduct(prd))
+	respond.Success(c, a.log, toAppProduct(output))
 }

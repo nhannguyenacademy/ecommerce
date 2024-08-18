@@ -22,17 +22,17 @@ func (a *app) createController(c *gin.Context) {
 		return
 	}
 
-	nc, err := toBusNewProduct(req)
+	input, err := toBusNewProduct(req)
 	if err != nil {
 		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
 		return
 	}
 
-	prd, err := a.productBus.Create(ctx, nc)
+	output, err := a.productBus.Create(ctx, input)
 	if err != nil {
-		respond.Error(c, a.log, errs.Newf(errs.Internal, "create: prd[%+v]: %s", prd, err))
+		respond.Error(c, a.log, errs.Newf(errs.Internal, "create: req[%+v]: %s", req, err))
 		return
 	}
 
-	respond.Success(c, a.log, toAppProduct(prd))
+	respond.Success(c, a.log, toAppProduct(output))
 }

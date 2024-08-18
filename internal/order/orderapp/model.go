@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/nhannguyenacademy/ecommerce/internal/order/orderbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"net/http"
 	"time"
 )
@@ -108,7 +109,7 @@ type newOrderItem struct {
 func toBusNewOrder(app newOrder) (orderbus.NewOrder, error) {
 	userID, err := uuid.Parse(app.UserID)
 	if err != nil {
-		return orderbus.NewOrder{}, fmt.Errorf("parsing user id: %w", err)
+		return orderbus.NewOrder{}, errs.New(errs.InvalidArgument, fmt.Errorf("parsing user id: %w", err))
 	}
 
 	items, err := toBusNewOrderItems(app.Items)

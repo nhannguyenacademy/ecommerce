@@ -1,8 +1,8 @@
 package productapp
 
 import (
+	"fmt"
 	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"strconv"
 	"time"
 )
@@ -13,7 +13,7 @@ func parseFilter(qp queryParams) (productbus.QueryFilter, error) {
 	if qp.Name != "" {
 		name, err := productbus.ParseName(qp.Name)
 		if err != nil {
-			return productbus.QueryFilter{}, errs.NewFieldsError("name", err)
+			return productbus.QueryFilter{}, fmt.Errorf("parse name: %w", err)
 		}
 		filter.Name = &name
 	}
@@ -21,7 +21,7 @@ func parseFilter(qp queryParams) (productbus.QueryFilter, error) {
 	if qp.StartCreatedDate != "" {
 		t, err := time.Parse(time.RFC3339, qp.StartCreatedDate)
 		if err != nil {
-			return productbus.QueryFilter{}, errs.NewFieldsError("start_created_date", err)
+			return productbus.QueryFilter{}, fmt.Errorf("parse start_created_date: %w", err)
 		}
 		filter.StartCreatedDate = &t
 	}
@@ -29,7 +29,7 @@ func parseFilter(qp queryParams) (productbus.QueryFilter, error) {
 	if qp.EndCreatedDate != "" {
 		t, err := time.Parse(time.RFC3339, qp.EndCreatedDate)
 		if err != nil {
-			return productbus.QueryFilter{}, errs.NewFieldsError("end_created_date", err)
+			return productbus.QueryFilter{}, fmt.Errorf("parse end_created_date: %w", err)
 		}
 		filter.EndCreatedDate = &t
 	}
@@ -37,7 +37,7 @@ func parseFilter(qp queryParams) (productbus.QueryFilter, error) {
 	if qp.StartPrice != "" {
 		startPrice, err := strconv.ParseInt(qp.StartPrice, 10, 64)
 		if err != nil {
-			return productbus.QueryFilter{}, errs.NewFieldsError("start_price", err)
+			return productbus.QueryFilter{}, fmt.Errorf("parse start_price: %w", err)
 		}
 		filter.StartPrice = &startPrice
 	}
@@ -45,7 +45,7 @@ func parseFilter(qp queryParams) (productbus.QueryFilter, error) {
 	if qp.EndPrice != "" {
 		endPrice, err := strconv.ParseInt(qp.EndPrice, 10, 64)
 		if err != nil {
-			return productbus.QueryFilter{}, errs.NewFieldsError("end_price", err)
+			return productbus.QueryFilter{}, fmt.Errorf("parse end_price: %w", err)
 		}
 		filter.EndPrice = &endPrice
 	}
