@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/gin-gonic/gin"
+	"github.com/nhannguyenacademy/ecommerce/internal/order/orderapp"
+	"github.com/nhannguyenacademy/ecommerce/internal/order/orderbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/order/orderstore/orderdb"
 	"github.com/nhannguyenacademy/ecommerce/internal/product/productapp"
 	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/product/productstore/productdb"
@@ -155,6 +158,8 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	productBus := productbus.NewBusiness(log, productdb.NewStore(log, db))
 
+	orderBus := orderbus.NewBusiness(log, orderdb.NewStore(log, db), productBus)
+
 	// -------------------------------------------------------------------------
 	// Start API Service
 
@@ -172,6 +177,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	apiV1Router.Use(mid.Logging(log, []string{}), mid.Panic(log))
 	userapp.New(log, ath, cfg.Auth.ActiveKID, userBus).Routes(apiV1Router)
 	productapp.New(log, ath, productBus).Routes(apiV1Router)
+	orderapp.New(log, ath, sqldb.NewBeginner(db), orderBus).Routes(apiV1Router)
 
 	// Construct API server
 	api := http.Server{

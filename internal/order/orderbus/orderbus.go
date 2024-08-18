@@ -56,9 +56,15 @@ func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
 		return nil, err
 	}
 
+	productBus, err := b.productBus.NewWithTx(tx)
+	if err != nil {
+		return nil, err
+	}
+
 	bus := Business{
-		log:    b.log,
-		storer: orderStorer,
+		log:        b.log,
+		storer:     orderStorer,
+		productBus: productBus,
 	}
 
 	return &bus, nil

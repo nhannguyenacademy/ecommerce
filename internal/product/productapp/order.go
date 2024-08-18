@@ -5,8 +5,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
 )
 
-// Orders
-
 var defaultOrderBy = order.NewBy("date_created", order.ASC)
 
 var orderByFields = map[string]string{

@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"net/mail"
 )
@@ -19,7 +18,6 @@ var (
 
 // Storer interface declares the behavior this package needs to perists and retrieve data.
 type Storer interface {
-	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
 	Create(ctx context.Context, usr User) error
 	Update(ctx context.Context, usr User) error
 	QueryByID(ctx context.Context, userID uuid.UUID) (User, error)
@@ -42,19 +40,4 @@ func NewBusiness(
 		log:    log,
 		storer: storer,
 	}
-}
-
-// NewWithTx constructs a new business value that will use the specified transaction in any store related calls.
-func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
-	storer, err := b.storer.NewWithTx(tx)
-	if err != nil {
-		return nil, err
-	}
-
-	bus := Business{
-		log:    b.log,
-		storer: storer,
-	}
-
-	return &bus, nil
 }

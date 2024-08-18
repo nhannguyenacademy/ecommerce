@@ -8,6 +8,11 @@ import (
 )
 
 func (s *Store) Delete(ctx context.Context, ord orderbus.Order) error {
+	// this method needs to be run within a transaction
+	if _, ok := s.db.(sqldb.CommitRollbacker); !ok {
+		return fmt.Errorf("store: db not a CommitRollbacker")
+	}
+
 	dbOrd, _ := toDBOrder(ord)
 
 	// ===============================================================

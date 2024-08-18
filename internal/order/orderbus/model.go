@@ -40,7 +40,6 @@ type NewOrder struct {
 // =============================================================================
 
 type NewOrderItem struct {
-	OrderID   uuid.UUID
 	ProductID uuid.UUID
 	Quantity  int32
 }
