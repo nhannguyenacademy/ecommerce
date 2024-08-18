@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/response"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"runtime"
 )
@@ -14,7 +14,7 @@ func Panic(l *logger.Logger) gin.HandlerFunc {
 		defer func() {
 			if r := recover(); r != nil {
 				err := fmt.Errorf("panic: %+v - stack: %s", r, string(stack(3)))
-				response.Send(c, l, nil, err)
+				respond.Error(c, l, err)
 				return
 			}
 		}()

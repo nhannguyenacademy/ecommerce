@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/response"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
@@ -19,7 +19,7 @@ func BeginCommitRollback(l *logger.Logger, bgn sqldb.Beginner) gin.HandlerFunc {
 		l.Info(ctx, "BEGIN TRANSACTION")
 		tx, err := bgn.Begin()
 		if err != nil {
-			response.Send(c, l, nil, errs.Newf(errs.Internal, "BEGIN TRANSACTION: %s", err))
+			respond.Error(c, l, errs.Newf(errs.Internal, "BEGIN TRANSACTION: %s", err))
 			return
 		}
 
@@ -47,7 +47,7 @@ func BeginCommitRollback(l *logger.Logger, bgn sqldb.Beginner) gin.HandlerFunc {
 
 		l.Info(ctx, "COMMIT TRANSACTION")
 		if err := tx.Commit(); err != nil {
-			response.Send(c, l, nil, errs.Newf(errs.Internal, "COMMIT TRANSACTION: %s", err))
+			respond.Error(c, l, errs.Newf(errs.Internal, "COMMIT TRANSACTION: %s", err))
 			return
 		}
 

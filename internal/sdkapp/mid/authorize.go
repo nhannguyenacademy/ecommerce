@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/response"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
@@ -19,14 +19,14 @@ func Authorize(l *logger.Logger, auth *auth.Auth, rule auth.Rule) gin.HandlerFun
 		ctx := c.Request.Context()
 		userID, err := GetUserID(ctx)
 		if err != nil {
-			response.Send(c, l, nil, errs.New(errs.Unauthenticated, err))
+			respond.Error(c, l, errs.New(errs.Unauthenticated, err))
 			return
 		}
 
 		claims := GetClaims(ctx)
 
 		if err := auth.Authorize(ctx, claims, userID, rule); err != nil {
-			response.Send(c, l, nil, errs.New(errs.Unauthenticated, err))
+			respond.Error(c, l, errs.New(errs.Unauthenticated, err))
 			return
 		}
 
@@ -47,7 +47,7 @@ func AuthorizeUser(l *logger.Logger, auth *auth.Auth, userBus *userbus.Business,
 			var err error
 			userID, err = uuid.Parse(id)
 			if err != nil {
-				response.Send(c, l, nil, errs.New(errs.Unauthenticated, ErrInvalidID))
+				respond.Error(c, l, errs.New(errs.Unauthenticated, ErrInvalidID))
 				return
 			}
 
@@ -55,10 +55,10 @@ func AuthorizeUser(l *logger.Logger, auth *auth.Auth, userBus *userbus.Business,
 			if err != nil {
 				switch {
 				case errors.Is(err, userbus.ErrNotFound):
-					response.Send(c, l, nil, errs.New(errs.Unauthenticated, err))
+					respond.Error(c, l, errs.New(errs.Unauthenticated, err))
 					return
 				default:
-					response.Send(c, l, nil, errs.Newf(errs.Unauthenticated, "querybyid: userID[%s]: %s", userID, err))
+					respond.Error(c, l, errs.Newf(errs.Unauthenticated, "querybyid: userID[%s]: %s", userID, err))
 					return
 				}
 			}
@@ -68,7 +68,7 @@ func AuthorizeUser(l *logger.Logger, auth *auth.Auth, userBus *userbus.Business,
 
 		claims := GetClaims(ctx)
 		if err := auth.Authorize(ctx, claims, userID, rule); err != nil {
-			response.Send(c, l, nil, errs.New(errs.Unauthenticated, err))
+			respond.Error(c, l, errs.New(errs.Unauthenticated, err))
 			return
 		}
 

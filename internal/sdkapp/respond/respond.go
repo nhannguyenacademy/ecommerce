@@ -1,0 +1,47 @@
+// Package respond contains functions to send responses to clients.
+package respond
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
+	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
+	"net/http"
+)
+
+type httpStatus interface {
+	HTTPStatus() int
+}
+
+func Success(c *gin.Context, log *logger.Logger, data any) {
+	ctx := c.Request.Context()
+
+	var statusCode int
+	switch v := data.(type) {
+	case httpStatus:
+		statusCode = v.HTTPStatus()
+	case error:
+		statusCode = http.StatusInternalServerError
+		log.Warn(ctx, "respond success: should not return error in data", "error", v)
+	default:
+		statusCode = http.StatusOK
+		if data == nil {
+			statusCode = http.StatusNoContent
+		}
+	}
+
+	c.JSON(statusCode, data)
+}
+
+func Error(c *gin.Context, log *logger.Logger, err error) {
+	ctx := c.Request.Context()
+	if err == nil {
+		log.Warn(ctx, "respond error: error is nil")
+	}
+
+	if cErr := c.Error(err); cErr != nil {
+		log.Warn(ctx, "respond error: failed to add error to gin context", "error", cErr, "original error", err)
+	}
+
+	appErr := errs.NewError(err)
+	c.AbortWithStatusJSON(appErr.HTTPStatus(), appErr)
+}

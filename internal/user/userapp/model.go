@@ -10,30 +10,23 @@ import (
 
 // =============================================================================
 
-// user represents information about an individual user.
 type user struct {
-	ID                string   `json:"id"`
-	Name              string   `json:"name"`
-	Email             string   `json:"email"`
-	Roles             []string `json:"roles"`
-	PasswordHash      string   `json:"-"`
-	Enabled           bool     `json:"-"`
-	EmailConfirmToken string   `json:"-"`
-	DateCreated       string   `json:"date_created"`
-	DateUpdated       string   `json:"date_updated"`
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Email       string   `json:"email"`
+	Roles       []string `json:"roles"`
+	DateCreated string   `json:"date_created"`
+	DateUpdated string   `json:"date_updated"`
 }
 
 func toAppUser(bus userbus.User) user {
 	return user{
-		ID:                bus.ID.String(),
-		Name:              bus.Name.String(),
-		Email:             bus.Email.Address,
-		Roles:             userbus.ParseRolesToString(bus.Roles),
-		PasswordHash:      bus.PasswordHash,
-		Enabled:           bus.Enabled,
-		EmailConfirmToken: bus.EmailConfirmToken,
-		DateCreated:       bus.DateCreated.Format(time.RFC3339),
-		DateUpdated:       bus.DateUpdated.Format(time.RFC3339),
+		ID:          bus.ID.String(),
+		Name:        bus.Name.String(),
+		Email:       bus.Email.Address,
+		Roles:       userbus.ParseRolesToString(bus.Roles),
+		DateCreated: bus.DateCreated.Format(time.RFC3339),
+		DateUpdated: bus.DateUpdated.Format(time.RFC3339),
 	}
 }
 
@@ -46,7 +39,6 @@ type authenUser struct {
 
 // =============================================================================
 
-// registerUser defines the data needed to register a new user.
 type registerUser struct {
 	Name            string `json:"name" binding:"required"`
 	Email           string `json:"email" binding:"required,email"`

@@ -1,37 +1,39 @@
 package productapp
 
 import (
-	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/response"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
 )
 
 func (a *app) deleteController(c *gin.Context) {
-	err := a.delete(c.Request.Context(), c.Param("product_id"))
-	response.Send(c, a.log, nil, err)
-}
+	ctx := c.Request.Context()
 
-func (a *app) delete(ctx context.Context, id string) error {
-	prdID, err := uuid.Parse(id)
+	prdID, err := uuid.Parse(c.Param("product_id"))
 	if err != nil {
-		return errs.Newf(errs.InvalidArgument, "invalid product id: %s", err)
+		respond.Error(c, a.log, errs.Newf(errs.InvalidArgument, "invalid product id: %s", err))
+		return
 	}
 
 	prd, err := a.productBus.QueryByID(ctx, prdID)
 	if err != nil {
+		var appErr *errs.Error
 		if errors.Is(err, productbus.ErrNotFound) {
-			return errs.Newf(errs.NotFound, "querybyid: %s", err)
+			appErr = errs.Newf(errs.NotFound, "querybyid: %s", err)
+		} else {
+			appErr = errs.Newf(errs.Internal, "querybyid: %s", err)
 		}
-		return errs.Newf(errs.Internal, "querybyid: %s", err)
+		respond.Error(c, a.log, appErr)
+		return
 	}
 
 	if err := a.productBus.Delete(ctx, prd); err != nil {
-		return errs.Newf(errs.Internal, "delete: prdID[%s]: %s", prd.ID, err)
+		respond.Error(c, a.log, errs.Newf(errs.Internal, "delete: prdID[%s]: %s", prd.ID, err))
+		return
 	}
 
-	return nil
+	respond.Success(c, a.log, nil)
 }

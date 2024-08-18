@@ -1,51 +1,53 @@
 package userapp
 
 import (
-	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/response"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 	"net/mail"
 	"time"
 )
 
 func (a *app) loginController(c *gin.Context) {
-	var lu loginUser
-	if err := c.ShouldBindJSON(&lu); err != nil {
+	ctx := c.Request.Context()
+
+	var req loginUser
+	if err := c.ShouldBindJSON(&req); err != nil {
 		var vErrs validator.ValidationErrors
 		if errors.As(err, &vErrs) {
 			err = errs.Newf(errs.InvalidArgument, "%s", vErrs)
 		}
 
-		response.Send(c, a.log, nil, err)
+		respond.Error(c, a.log, err)
 		return
 	}
 
-	usr, err := a.login(c.Request.Context(), lu)
-	response.Send(c, a.log, usr, err)
-}
-
-func (a *app) login(ctx context.Context, req loginUser) (authenUser, error) {
 	addr, err := mail.ParseAddress(req.Email)
 	if err != nil {
-		return authenUser{}, errs.New(errs.InvalidArgument, err)
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
+		return
 	}
 
 	usr, err := a.userBus.Authenticate(ctx, *addr, req.Password)
 	if err != nil {
+		var appErr *errs.Error
 		if errors.Is(err, userbus.ErrAuthenticationFailure) {
-			return authenUser{}, errs.New(errs.Unauthenticated, err)
+			appErr = errs.New(errs.Unauthenticated, err)
+		} else {
+			appErr = errs.New(errs.Internal, err)
 		}
-		return authenUser{}, errs.New(errs.Internal, err)
+		respond.Error(c, a.log, appErr)
+		return
 	}
 
 	if !usr.Enabled || usr.EmailConfirmToken != "" {
-		return authenUser{}, errs.New(errs.Unauthenticated, errors.New("invalid user"))
+		respond.Error(c, a.log, errs.New(errs.Unauthenticated, errors.New("invalid user")))
+		return
 	}
 
 	claims := auth.Claims{
@@ -59,11 +61,12 @@ func (a *app) login(ctx context.Context, req loginUser) (authenUser, error) {
 	}
 	token, err := a.auth.GenerateToken(a.activeKID, claims)
 	if err != nil {
-		return authenUser{}, errs.New(errs.Internal, err)
+		respond.Error(c, a.log, errs.New(errs.Internal, err))
+		return
 	}
 
-	return authenUser{
+	respond.Success(c, a.log, authenUser{
 		UserID: usr.ID.String(),
 		Token:  token,
-	}, nil
+	})
 }

@@ -11,6 +11,8 @@ import (
 func (b *Business) Create(ctx context.Context, np NewProduct) (Product, error) {
 	now := time.Now()
 
+	// todo: upload image to s3
+
 	prd := Product{
 		ID:          uuid.New(),
 		Name:        np.Name,

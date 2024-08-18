@@ -33,5 +33,9 @@ func (b *Business) Create(ctx context.Context, nu NewUser) (User, error) {
 		return User{}, fmt.Errorf("create: %w", err)
 	}
 
+	if usr.EmailConfirmToken != "" {
+		// todo: send email confirmation
+	}
+
 	return usr, nil
 }
