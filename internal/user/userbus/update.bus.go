@@ -7,34 +7,33 @@ import (
 	"time"
 )
 
-// Update modifies information about a user.
-func (b *Business) Update(ctx context.Context, usr User, uu UpdateUser) (User, error) {
-	if uu.Name != nil {
-		usr.Name = *uu.Name
+func (b *Business) Update(ctx context.Context, usr User, input UpdateUser) (User, error) {
+	if input.Name != nil {
+		usr.Name = *input.Name
 	}
 
-	if uu.Email != nil {
-		usr.Email = *uu.Email
+	if input.Email != nil {
+		usr.Email = *input.Email
 	}
 
-	if uu.Roles != nil {
-		usr.Roles = uu.Roles
+	if input.Roles != nil {
+		usr.Roles = input.Roles
 	}
 
-	if uu.Password != nil {
-		pw, err := bcrypt.GenerateFromPassword([]byte(*uu.Password), bcrypt.DefaultCost)
+	if input.Password != nil {
+		pw, err := bcrypt.GenerateFromPassword([]byte(*input.Password), bcrypt.DefaultCost)
 		if err != nil {
 			return User{}, fmt.Errorf("generatefrompassword: %w", err)
 		}
 		usr.PasswordHash = string(pw)
 	}
 
-	if uu.Enabled != nil {
-		usr.Enabled = *uu.Enabled
+	if input.Enabled != nil {
+		usr.Enabled = *input.Enabled
 	}
 
-	if uu.EmailConfirmToken != nil {
-		usr.EmailConfirmToken = *uu.EmailConfirmToken
+	if input.EmailConfirmToken != nil {
+		usr.EmailConfirmToken = *input.EmailConfirmToken
 	}
 
 	usr.DateUpdated = time.Now()

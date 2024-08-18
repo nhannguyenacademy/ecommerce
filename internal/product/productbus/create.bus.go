@@ -7,19 +7,18 @@ import (
 	"time"
 )
 
-// Create adds a new product to the system.
-func (b *Business) Create(ctx context.Context, np NewProduct) (Product, error) {
+func (b *Business) Create(ctx context.Context, input NewProduct) (Product, error) {
 	now := time.Now()
 
 	// todo: upload image to s3
 
 	prd := Product{
 		ID:          uuid.New(),
-		Name:        np.Name,
-		Description: np.Description,
-		ImageURL:    np.ImageURL,
-		Price:       np.Price,
-		Quantity:    np.Quantity,
+		Name:        input.Name,
+		Description: input.Description,
+		ImageURL:    input.ImageURL,
+		Price:       input.Price,
+		Quantity:    input.Quantity,
 		DateCreated: now,
 		DateUpdated: now,
 	}

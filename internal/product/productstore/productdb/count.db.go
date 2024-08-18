@@ -8,7 +8,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 )
 
-// Count returns the total number of products in the DB.
 func (s *Store) Count(ctx context.Context, filter productbus.QueryFilter) (int, error) {
 	data := map[string]any{}
 

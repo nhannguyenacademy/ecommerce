@@ -3,11 +3,16 @@ package orderbus
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 )
 
-func (b *Business) Delete(ctx context.Context, ord Order) error {
-	// todo: check if order has any success payments,
-	// but orderbus cannot import paymentbus, use delegate instead
+func (b *Business) Delete(ctx context.Context, id uuid.UUID) error {
+	ord, err := b.QueryByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// todo: check if order has any success payments, but orderbus cannot import paymentbus, use delegate instead
 
 	if ord.Status.Equal(Statuses.Finished) {
 		return fmt.Errorf("order %s: %w", ord.ID, ErrOrderAlreadyFinished)

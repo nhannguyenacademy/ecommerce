@@ -7,7 +7,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 )
 
-// Create inserts a new product into the database.
 func (s *Store) Create(ctx context.Context, prd productbus.Product) error {
 	const q = `
 	INSERT INTO products

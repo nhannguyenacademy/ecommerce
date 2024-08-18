@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// QueryByID finds the user by the specified ID.
 func (b *Business) QueryByID(ctx context.Context, userID uuid.UUID) (User, error) {
 	user, err := b.storer.QueryByID(ctx, userID)
 	if err != nil {

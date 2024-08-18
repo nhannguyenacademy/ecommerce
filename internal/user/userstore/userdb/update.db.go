@@ -8,7 +8,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 )
 
-// Update replaces a user document in the database.
 func (s *Store) Update(ctx context.Context, usr userbus.User) error {
 	const q = `
 	UPDATE

@@ -7,7 +7,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 )
 
-// Delete removes a product from the database.
 func (s *Store) Delete(ctx context.Context, prd productbus.Product) error {
 	const q = `
 	DELETE FROM

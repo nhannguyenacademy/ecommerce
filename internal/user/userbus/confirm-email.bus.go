@@ -5,7 +5,6 @@ import (
 	"fmt"
 )
 
-// ConfirmEmail validates the email confirmation token and updates the user record.
 func (b *Business) ConfirmEmail(ctx context.Context, confirmToken string) error {
 	usr, err := b.storer.QueryByEmailConfirmToken(ctx, confirmToken)
 	if err != nil {

@@ -7,7 +7,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 )
 
-// Update replaces a product document in the database.
 func (s *Store) Update(ctx context.Context, prd productbus.Product) error {
 	const q = `
 	UPDATE

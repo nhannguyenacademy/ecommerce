@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-func (b *Business) Create(ctx context.Context, no NewOrder) (Order, error) {
+func (b *Business) Create(ctx context.Context, input NewOrder) (Order, error) {
 	prodItemMap := make(map[uuid.UUID]NewOrderItem)
-	prodIDs := make([]uuid.UUID, len(no.Items))
-	for i, itm := range no.Items {
+	prodIDs := make([]uuid.UUID, len(input.Items))
+	for i, itm := range input.Items {
 		if _, exist := prodItemMap[itm.ProductID]; exist {
 			return Order{}, fmt.Errorf("duplicate product id: %s", itm.ProductID)
 		}
@@ -39,7 +39,7 @@ func (b *Business) Create(ctx context.Context, no NewOrder) (Order, error) {
 		}
 
 		remaining := prd.Quantity - prodItemMap[prd.ID].Quantity
-		if _, err = b.productBus.Update(ctx, prd, productbus.UpdateProduct{
+		if _, err = b.productBus.Update(ctx, prd.ID, productbus.UpdateProduct{
 			Quantity: &remaining,
 		}); err != nil {
 			return Order{}, fmt.Errorf("update product [%s]: %w", prd.ID, err)
@@ -60,7 +60,7 @@ func (b *Business) Create(ctx context.Context, no NewOrder) (Order, error) {
 
 	ord := Order{
 		ID:          ordID,
-		UserID:      no.UserID,
+		UserID:      input.UserID,
 		Amount:      orderAmount,
 		Status:      Statuses.Created,
 		DateCreated: now,

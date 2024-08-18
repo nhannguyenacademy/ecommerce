@@ -10,7 +10,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 )
 
-// Query retrieves a list of existing products from the database.
 func (s *Store) Query(ctx context.Context, filter productbus.QueryFilter, orderBy order.By, page page.Page) ([]productbus.Product, error) {
 	data := map[string]any{
 		"offset":        (page.Number() - 1) * page.RowsPerPage(),

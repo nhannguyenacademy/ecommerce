@@ -15,9 +15,10 @@ import (
 // Set of error variables for CRUD operations.
 
 var (
-	ErrNotFound             = errors.New("order not found")
-	ErrMissingProducts      = errors.New("missing products")
-	ErrOrderAlreadyFinished = errors.New("order already finished")
+	ErrNotFound              = errors.New("order not found")
+	ErrMissingProducts       = errors.New("missing products")
+	ErrOrderAlreadyFinished  = errors.New("order already finished")
+	ErrOrderAlreadyCancelled = errors.New("order already cancelled")
 )
 
 type Storer interface {

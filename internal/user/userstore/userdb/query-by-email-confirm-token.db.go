@@ -8,7 +8,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 )
 
-// QueryByEmailConfirmToken gets the specified user from the database by email confirm token.
 func (s *Store) QueryByEmailConfirmToken(ctx context.Context, emailConfirmToken string) (userbus.User, error) {
 	data := struct {
 		EmailConfirmToken string `db:"email_confirm_token"`

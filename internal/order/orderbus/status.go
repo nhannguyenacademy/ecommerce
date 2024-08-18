@@ -3,13 +3,15 @@ package orderbus
 import "fmt"
 
 type statusSet struct {
-	Created  Status
-	Finished Status
+	Created   Status
+	Finished  Status
+	Cancelled Status
 }
 
 var Statuses = statusSet{
-	Created:  newStatus("CREATED"),
-	Finished: newStatus("FINISHED"),
+	Created:   newStatus("CREATED"),
+	Finished:  newStatus("FINISHED"),
+	Cancelled: newStatus("CANCELLED"),
 }
 
 // =============================================================================

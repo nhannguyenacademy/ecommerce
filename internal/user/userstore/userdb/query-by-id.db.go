@@ -9,7 +9,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 )
 
-// QueryByID gets the specified user from the database.
 func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (userbus.User, error) {
 	data := struct {
 		ID string `db:"user_id"`

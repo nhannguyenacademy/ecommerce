@@ -8,7 +8,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 )
 
-// Create inserts a new user into the database.
 func (s *Store) Create(ctx context.Context, usr userbus.User) error {
 	const q = `
 	INSERT INTO users

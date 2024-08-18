@@ -6,10 +6,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func (b *Business) QueryByID(ctx context.Context, prdID uuid.UUID) (Product, error) {
-	prd, err := b.storer.QueryByID(ctx, prdID)
+func (b *Business) QueryByID(ctx context.Context, id uuid.UUID) (Product, error) {
+	prd, err := b.storer.QueryByID(ctx, id)
 	if err != nil {
-		return Product{}, fmt.Errorf("query: prdID[%s]: %w", prdID, err)
+		return Product{}, fmt.Errorf("query: id[%s]: %w", id, err)
 	}
 
 	return prd, nil

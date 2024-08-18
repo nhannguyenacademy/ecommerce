@@ -3,29 +3,34 @@ package productbus
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"time"
 )
 
-// Update modifies information about a product.
-func (b *Business) Update(ctx context.Context, prd Product, uu UpdateProduct) (Product, error) {
-	if uu.Name != nil {
-		prd.Name = *uu.Name
+func (b *Business) Update(ctx context.Context, id uuid.UUID, input UpdateProduct) (Product, error) {
+	prd, err := b.QueryByID(ctx, id)
+	if err != nil {
+		return Product{}, err
 	}
 
-	if uu.Description != nil {
-		prd.Description = *uu.Description
+	if input.Name != nil {
+		prd.Name = *input.Name
 	}
 
-	if uu.ImageURL != nil {
-		prd.ImageURL = *uu.ImageURL
+	if input.Description != nil {
+		prd.Description = *input.Description
 	}
 
-	if uu.Price != nil {
-		prd.Price = *uu.Price
+	if input.ImageURL != nil {
+		prd.ImageURL = *input.ImageURL
 	}
 
-	if uu.Quantity != nil {
-		prd.Quantity = *uu.Quantity
+	if input.Price != nil {
+		prd.Price = *input.Price
+	}
+
+	if input.Quantity != nil {
+		prd.Quantity = *input.Quantity
 	}
 
 	prd.DateUpdated = time.Now()

@@ -8,7 +8,6 @@ import (
 	"net/mail"
 )
 
-// Authenticate finds a user by their email and verifies their password
 func (b *Business) Authenticate(ctx context.Context, email mail.Address, password string) (User, error) {
 	usr, err := b.QueryByEmail(ctx, email)
 	if err != nil {

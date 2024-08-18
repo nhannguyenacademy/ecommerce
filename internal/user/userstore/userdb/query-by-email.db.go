@@ -9,7 +9,6 @@ import (
 	"net/mail"
 )
 
-// QueryByEmail gets the specified user from the database by email.
 func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (userbus.User, error) {
 	data := struct {
 		Email string `db:"email"`

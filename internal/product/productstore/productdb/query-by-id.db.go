@@ -9,7 +9,6 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 )
 
-// QueryByID gets the specified product from the database.
 func (s *Store) QueryByID(ctx context.Context, prdID uuid.UUID) (productbus.Product, error) {
 	data := struct {
 		ID string `db:"product_id"`

@@ -30,27 +30,21 @@ func (a *app) updateController(c *gin.Context) {
 		return
 	}
 
-	prd, err := a.productBus.QueryByID(ctx, id)
-	if err != nil {
-		var appErr *errs.Error
-		if errors.Is(err, productbus.ErrNotFound) {
-			appErr = errs.Newf(errs.NotFound, "querybyid: %s", err)
-		} else {
-			appErr = errs.Newf(errs.Internal, "querybyid: %s", err)
-		}
-		respond.Error(c, a.log, appErr)
-		return
-	}
-
 	input, err := toBusUpdateProduct(req)
 	if err != nil {
 		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
 		return
 	}
 
-	output, err := a.productBus.Update(ctx, prd, input)
+	output, err := a.productBus.Update(ctx, id, input)
 	if err != nil {
-		respond.Error(c, a.log, errs.Newf(errs.Internal, "update: id[%s] req[%+v]: %s", prd.ID, req, err))
+		var appErr *errs.Error
+		if errors.Is(err, productbus.ErrNotFound) {
+			appErr = errs.Newf(errs.NotFound, "update: id[%s] req[%+v]: %s", id, req, err)
+		} else {
+			appErr = errs.Newf(errs.Internal, "update: id[%s] req[%+v]: %s", id, req, err)
+		}
+		respond.Error(c, a.log, appErr)
 		return
 	}
 
