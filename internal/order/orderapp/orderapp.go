@@ -291,7 +291,7 @@ func (a *app) updateStatusHandler(c *gin.Context) {
 		return
 	}
 
-	ord, err := a.orderBus.QueryByID(ctx, orderID)
+	ord, err := a.orderBus.QueryByIDWithItems(ctx, orderID)
 	if err != nil {
 		if errors.Is(err, orderbus.ErrNotFound) {
 			respond.Error(c, a.log, errs.Newf(errs.NotFound, "order orderID[%s] not found", orderID))
@@ -301,10 +301,14 @@ func (a *app) updateStatusHandler(c *gin.Context) {
 		return
 	}
 
-	updatedOrder, err := a.orderBus.UpdateStatus(ctx, ord, status)
+	updatedOrder, err := a.orderBus.UpdateStatus(ctx, ord.Order, status)
 	if err != nil {
 		respond.Error(c, a.log, errs.Newf(errs.Internal, "update order status: orderID[%s]: %s", orderID, err))
 		return
+	}
+
+	if updatedOrder.Status.Equal(orderbus.Statuses.Cancelled) {
+		// todo: revert product quantity (here or move to bus?)
 	}
 
 	respond.Success(c, a.log, toAppOrder(updatedOrder))
@@ -331,6 +335,14 @@ func (a *app) cancelHandler(c *gin.Context) {
 		return
 	}
 
+	// todo: revert product quantity (here or move to bus?)
+	items, err := a.orderBus.QueryOrderItems(ctx, updatedOrder)
+	if err != nil {
+		respond.Error(c, a.log, errs.Newf(errs.Internal, "query order items: orderID[%s]: %s", orderID, err))
+		return
+	}
+	_ = items
+
 	respond.Success(c, a.log, toAppOrder(updatedOrder))
 }
 
@@ -350,7 +362,7 @@ func (a *app) deleteHandler(c *gin.Context) {
 	}
 	// todo: check if order has any success payments, but orderbus cannot import paymentbus, use delegate instead
 
-	ord, err := a.orderBus.QueryByID(ctx, orderID)
+	ord, err := a.orderBus.QueryByIDWithItems(ctx, orderID)
 	if err != nil {
 		if errors.Is(err, orderbus.ErrNotFound) {
 			respond.Error(c, a.log, errs.Newf(errs.NotFound, "order orderID[%s] not found", orderID))
@@ -360,10 +372,12 @@ func (a *app) deleteHandler(c *gin.Context) {
 		return
 	}
 
-	if err := a.orderBus.Delete(ctx, ord); err != nil {
+	if err := a.orderBus.Delete(ctx, ord.Order); err != nil {
 		respond.Error(c, a.log, errs.Newf(errs.Internal, "delete: orderID[%s]: %s", orderID, err))
 		return
 	}
+
+	// todo: revert product quantity (here or move to bus?)
 
 	respond.Success(c, a.log, nil)
 }

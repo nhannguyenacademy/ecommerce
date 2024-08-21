@@ -176,3 +176,12 @@ func (b *Business) Create(ctx context.Context, newOrder NewOrder) (Order, error)
 
 	return order, nil
 }
+
+func (b *Business) QueryOrderItems(ctx context.Context, order Order) ([]OrderItem, error) {
+	items, err := b.storer.QueryOrderItems(ctx, order)
+	if err != nil {
+		return nil, fmt.Errorf("query order items: %w", err)
+	}
+
+	return items, nil
+}
