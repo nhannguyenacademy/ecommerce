@@ -5,8 +5,8 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/query"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sort"
 )
 
 func (a *app) queryController(c *gin.Context) {
@@ -25,13 +25,13 @@ func (a *app) queryController(c *gin.Context) {
 		return
 	}
 
-	orderBy, err := order.Parse(orderByFields, qp.OrderBy, defaultOrderBy)
+	sortBy, err := sort.Parse(sortByFields, qp.SortBy, defaultSortBy)
 	if err != nil {
 		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
 		return
 	}
 
-	output, err := a.productBus.Query(ctx, filter, orderBy, page)
+	output, err := a.productBus.Query(ctx, filter, sortBy, page)
 	if err != nil {
 		respond.Error(c, a.log, errs.Newf(errs.Internal, "query: %s", err))
 		return

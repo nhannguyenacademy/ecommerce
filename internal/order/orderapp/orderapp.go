@@ -11,7 +11,10 @@ import (
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/query"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sort"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
@@ -72,7 +75,7 @@ func (a *app) newWithTx(ctx context.Context) (*app, error) {
 	return &app, nil
 }
 
-func (a *app) createController(c *gin.Context) {
+func (a *app) createHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	// construct a new app value using a store transaction
@@ -147,7 +150,99 @@ func (a *app) createController(c *gin.Context) {
 	respond.Success(c, a.log, toAppOrder(ord))
 }
 
-func (a *app) queryByIDController(c *gin.Context) {
+func (a *app) queryHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+	qp := parseQueryParams(c.Request)
+
+	page, err := page.Parse(qp.Page, qp.Rows)
+	if err != nil {
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
+		return
+	}
+
+	filter, err := parseFilter(qp)
+	if err != nil {
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
+		return
+	}
+
+	sortBy, err := sort.Parse(sortByFields, qp.SortBy, defaultSortBy)
+	if err != nil {
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
+		return
+	}
+
+	output, err := a.orderBus.Query(ctx, filter, sortBy, page)
+	if err != nil {
+		respond.Error(c, a.log, errs.Newf(errs.Internal, "query: %s", err))
+		return
+	}
+
+	total, err := a.orderBus.Count(ctx, filter)
+	if err != nil {
+		respond.Error(c, a.log, errs.Newf(errs.Internal, "count: %s", err))
+		return
+	}
+
+	respond.Success(c, a.log, query.NewResult(toAppOrders(output), total, page))
+}
+
+func (a *app) queryUserOrdersHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+	qp := parseQueryParams(c.Request)
+
+	usrID, err := uuid.Parse(c.Param("user_id"))
+	if err != nil {
+		respond.Error(c, a.log, errs.Newf(errs.InvalidArgument, "invalid user id: %s", err))
+		return
+	}
+
+	authenUsrID, err := mid.GetUserID(ctx)
+	if err != nil {
+		respond.Error(c, a.log, errs.New(errs.Internal, err))
+		return
+	}
+
+	if usrID != authenUsrID {
+		respond.Error(c, a.log, errs.New(errs.PermissionDenied, errors.New("user id mismatch")))
+		return
+	}
+
+	page, err := page.Parse(qp.Page, qp.Rows)
+	if err != nil {
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
+		return
+	}
+
+	filter, err := parseFilter(qp)
+	if err != nil {
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
+		return
+	}
+	filter.UserID = &authenUsrID
+
+	sortBy, err := sort.Parse(sortByFields, qp.SortBy, defaultSortBy)
+	if err != nil {
+		respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
+		return
+	}
+
+	output, err := a.orderBus.Query(ctx, filter, sortBy, page)
+	if err != nil {
+		respond.Error(c, a.log, errs.Newf(errs.Internal, "query: %s", err))
+		return
+	}
+
+	total, err := a.orderBus.Count(ctx, filter)
+	if err != nil {
+		respond.Error(c, a.log, errs.Newf(errs.Internal, "count: %s", err))
+		return
+	}
+
+	respond.Success(c, a.log, query.NewResult(toAppOrders(output), total, page))
+}
+
+func (a *app) queryByIDHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	id, err := uuid.Parse(c.Param("order_id"))
@@ -175,41 +270,7 @@ func (a *app) queryByIDController(c *gin.Context) {
 	respond.Success(c, a.log, toAppOrderDetail(ordWItms, usr))
 }
 
-func (a *app) deleteController(c *gin.Context) {
-	ctx := c.Request.Context()
-
-	a, err := a.newWithTx(ctx)
-	if err != nil {
-		respond.Error(c, a.log, errs.New(errs.Internal, err))
-		return
-	}
-
-	id, err := uuid.Parse(c.Param("order_id"))
-	if err != nil {
-		respond.Error(c, a.log, errs.Newf(errs.InvalidArgument, "invalid id: %s", err))
-		return
-	}
-	// todo: check if order has any success payments, but orderbus cannot import paymentbus, use delegate instead
-
-	ord, err := a.orderBus.QueryByID(ctx, id)
-	if err != nil {
-		if errors.Is(err, orderbus.ErrNotFound) {
-			respond.Error(c, a.log, errs.Newf(errs.NotFound, "order id[%s] not found", id))
-		} else {
-			respond.Error(c, a.log, errs.Newf(errs.Internal, "query order: id[%s]: %s", id, err))
-		}
-		return
-	}
-
-	if err := a.orderBus.Delete(ctx, ord); err != nil {
-		respond.Error(c, a.log, errs.Newf(errs.Internal, "delete: id[%s]: %s", id, err))
-		return
-	}
-
-	respond.Success(c, a.log, nil)
-}
-
-func (a *app) updateStatusController(c *gin.Context) {
+func (a *app) updateStatusHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	id, err := uuid.Parse(c.Param("order_id"))
@@ -249,7 +310,7 @@ func (a *app) updateStatusController(c *gin.Context) {
 	respond.Success(c, a.log, toAppOrder(updOrd))
 }
 
-func (a *app) cancelController(c *gin.Context) {
+func (a *app) cancelHandler(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	ordID, err := uuid.Parse(c.Param("order_id"))
@@ -271,4 +332,38 @@ func (a *app) cancelController(c *gin.Context) {
 	}
 
 	respond.Success(c, a.log, toAppOrder(updOrd))
+}
+
+func (a *app) deleteHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	a, err := a.newWithTx(ctx)
+	if err != nil {
+		respond.Error(c, a.log, errs.New(errs.Internal, err))
+		return
+	}
+
+	id, err := uuid.Parse(c.Param("order_id"))
+	if err != nil {
+		respond.Error(c, a.log, errs.Newf(errs.InvalidArgument, "invalid id: %s", err))
+		return
+	}
+	// todo: check if order has any success payments, but orderbus cannot import paymentbus, use delegate instead
+
+	ord, err := a.orderBus.QueryByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, orderbus.ErrNotFound) {
+			respond.Error(c, a.log, errs.Newf(errs.NotFound, "order id[%s] not found", id))
+		} else {
+			respond.Error(c, a.log, errs.Newf(errs.Internal, "query order: id[%s]: %s", id, err))
+		}
+		return
+	}
+
+	if err := a.orderBus.Delete(ctx, ord); err != nil {
+		respond.Error(c, a.log, errs.Newf(errs.Internal, "delete: id[%s]: %s", id, err))
+		return
+	}
+
+	respond.Success(c, a.log, nil)
 }

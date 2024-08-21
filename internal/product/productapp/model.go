@@ -15,7 +15,7 @@ import (
 type queryParams struct {
 	Page             string
 	Rows             string
-	OrderBy          string
+	SortBy           string
 	Name             string
 	StartCreatedDate string
 	EndCreatedDate   string
@@ -29,7 +29,7 @@ func parseQueryParams(r *http.Request) queryParams {
 	filter := queryParams{
 		Page:             values.Get("page"),
 		Rows:             values.Get("row"),
-		OrderBy:          values.Get("order_by"),
+		SortBy:           values.Get("sort_by"),
 		Name:             values.Get("name"),
 		StartCreatedDate: values.Get("start_created_date"),
 		EndCreatedDate:   values.Get("end_created_date"),

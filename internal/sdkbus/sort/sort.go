@@ -1,12 +1,12 @@
-// Package order provides support for describing the ordering of data.
-package order
+// Package sorting provides support for data sorting.
+package sort
 
 import (
 	"fmt"
 	"strings"
 )
 
-// Set of directions for data ordering.
+// Set of directions for data sorting.
 const (
 	ASC  = "ASC"
 	DESC = "DESC"
@@ -17,7 +17,7 @@ var directions = map[string]string{
 	DESC: "DESC",
 }
 
-// By represents a field used to order by and direction.
+// By represents a field used to sort by and direction.
 type By struct {
 	Field     string
 	Direction string
@@ -38,27 +38,26 @@ func NewBy(field string, direction string) By {
 	}
 }
 
-// Parse constructs a By value by parsing a string in the form of
-// "field,direction" ie "user_id,ASC".
-func Parse(fieldMappings map[string]string, orderBy string, defaultOrder By) (By, error) {
-	if orderBy == "" {
-		return defaultOrder, nil
+// Parse constructs a By value by parsing a string in the form of "field,direction" ie "user_id,ASC".
+func Parse(fieldMappings map[string]string, sortBy string, defaultSortBy By) (By, error) {
+	if sortBy == "" {
+		return defaultSortBy, nil
 	}
 
-	orderParts := strings.Split(orderBy, ",")
+	sortParts := strings.Split(sortBy, ",")
 
-	orgFieldName := strings.TrimSpace(orderParts[0])
+	orgFieldName := strings.TrimSpace(sortParts[0])
 	fieldName, exists := fieldMappings[orgFieldName]
 	if !exists {
-		return By{}, fmt.Errorf("unknown order: %s", orgFieldName)
+		return By{}, fmt.Errorf("unknown: %s", orgFieldName)
 	}
 
-	switch len(orderParts) {
+	switch len(sortParts) {
 	case 1:
 		return NewBy(fieldName, ASC), nil
 
 	case 2:
-		direction := strings.ToUpper(strings.TrimSpace(orderParts[1]))
+		direction := strings.ToUpper(strings.TrimSpace(sortParts[1]))
 		if _, exists := directions[direction]; !exists {
 			return By{}, fmt.Errorf("unknown direction: %s", direction)
 		}
@@ -66,6 +65,6 @@ func Parse(fieldMappings map[string]string, orderBy string, defaultOrder By) (By
 		return NewBy(fieldName, direction), nil
 
 	default:
-		return By{}, fmt.Errorf("unknown order: %s", orderBy)
+		return By{}, fmt.Errorf("unknown: %s", sortBy)
 	}
 }

@@ -17,7 +17,7 @@ import (
 type queryParams struct {
 	Page             string
 	Rows             string
-	OrderBy          string
+	SortBy           string
 	StartCreatedDate string
 	EndCreatedDate   string
 	UserID           string
@@ -30,7 +30,7 @@ func parseQueryParams(r *http.Request) queryParams {
 	filter := queryParams{
 		Page:             values.Get("page"),
 		Rows:             values.Get("row"),
-		OrderBy:          values.Get("order_by"),
+		SortBy:           values.Get("sort_by"),
 		StartCreatedDate: values.Get("start_created_date"),
 		EndCreatedDate:   values.Get("end_created_date"),
 		UserID:           values.Get("user_id"),
@@ -92,6 +92,14 @@ func toAppOrderDetail(bus orderbus.OrderWithItems, usr userbus.User) orderDetail
 			Email: usr.Email.String(),
 		},
 	}
+}
+
+func toAppOrders(bus []orderbus.Order) []order {
+	orders := make([]order, len(bus))
+	for i, v := range bus {
+		orders[i] = toAppOrder(v)
+	}
+	return orders
 }
 
 // ===================================================

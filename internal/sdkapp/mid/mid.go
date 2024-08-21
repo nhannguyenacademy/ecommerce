@@ -14,11 +14,11 @@ import (
 type ctxKey int
 
 const (
-	claimKey ctxKey = iota + 1
-	userIDKey
-	userKey
-	trKey
-	orderKey
+	claimKey       ctxKey = 1
+	transactionKey ctxKey = 2
+	userIDKey      ctxKey = 3
+	userKey        ctxKey = 4
+	orderKey       ctxKey = 5
 )
 
 func setClaims(ctx context.Context, claims auth.Claims) context.Context {
@@ -76,12 +76,12 @@ func GetOrder(ctx context.Context) (orderbus.Order, error) {
 }
 
 func setTran(ctx context.Context, tx sqldb.CommitRollbacker) context.Context {
-	return context.WithValue(ctx, trKey, tx)
+	return context.WithValue(ctx, transactionKey, tx)
 }
 
 // GetTran retrieves the value that can manage a transaction.
 func GetTran(ctx context.Context) (sqldb.CommitRollbacker, error) {
-	v, ok := ctx.Value(trKey).(sqldb.CommitRollbacker)
+	v, ok := ctx.Value(transactionKey).(sqldb.CommitRollbacker)
 	if !ok {
 		return nil, errors.New("transaction not found in context")
 	}

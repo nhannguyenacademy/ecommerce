@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/nhannguyenacademy/ecommerce/internal/order/orderbus"
-	ordering "github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sort"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
@@ -76,7 +76,7 @@ func (s *Store) Delete(ctx context.Context, ord orderbus.Order) error {
 	return nil
 }
 
-func (s *Store) Query(ctx context.Context, filter orderbus.QueryFilter, orderBy ordering.By, page page.Page) ([]orderbus.Order, error) {
+func (s *Store) Query(ctx context.Context, filter orderbus.QueryFilter, sortBy sort.By, page page.Page) ([]orderbus.Order, error) {
 	data := map[string]any{
 		"offset":        (page.Number() - 1) * page.RowsPerPage(),
 		"rows_per_page": page.RowsPerPage(),
@@ -91,7 +91,7 @@ func (s *Store) Query(ctx context.Context, filter orderbus.QueryFilter, orderBy 
 	buf := bytes.NewBufferString(ordQ)
 	applyFilter(filter, data, buf)
 
-	orderByClause, err := orderByClause(orderBy)
+	orderByClause, err := orderByClause(sortBy)
 	if err != nil {
 		return nil, err
 	}

@@ -5,8 +5,8 @@ import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sort"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
@@ -23,7 +23,7 @@ type Storer interface {
 	Create(ctx context.Context, prd Product) error
 	Update(ctx context.Context, prd Product) error
 	Delete(ctx context.Context, prd Product) error
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Product, error)
+	Query(ctx context.Context, filter QueryFilter, sortBy sort.By, page page.Page) ([]Product, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, prdID uuid.UUID) (Product, error)
 	QueryByIDs(ctx context.Context, prdIDs []uuid.UUID) ([]Product, error)

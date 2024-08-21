@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/order"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sort"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"time"
@@ -23,7 +23,7 @@ type Storer interface {
 	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
 	Create(ctx context.Context, ord Order) error
 	UpdateStatus(ctx context.Context, ord Order, status Status) error
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Order, error)
+	Query(ctx context.Context, filter QueryFilter, sortBy sort.By, page page.Page) ([]Order, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, ordID uuid.UUID) (Order, error)
 	Delete(ctx context.Context, ord Order) error
@@ -127,8 +127,8 @@ func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
 	return b.storer.Count(ctx, filter)
 }
 
-func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Order, error) {
-	ords, err := b.storer.Query(ctx, filter, orderBy, page)
+func (b *Business) Query(ctx context.Context, filter QueryFilter, sortBy sort.By, page page.Page) ([]Order, error) {
+	ords, err := b.storer.Query(ctx, filter, sortBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
