@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type product struct {
+type productRow struct {
 	ID          uuid.UUID      `db:"product_id"`
 	Name        string         `db:"name"`
 	Description sql.NullString `db:"description"`
@@ -21,8 +21,8 @@ type product struct {
 	DateUpdated time.Time      `db:"date_updated"`
 }
 
-func toDBProduct(bus productbus.Product) product {
-	return product{
+func toDBProduct(bus productbus.Product) productRow {
+	return productRow{
 		ID:          bus.ID,
 		Name:        bus.Name.String(),
 		Description: sql.NullString{String: bus.Description, Valid: bus.Description != ""},
@@ -34,15 +34,15 @@ func toDBProduct(bus productbus.Product) product {
 	}
 }
 
-func toBusProduct(db product) (productbus.Product, error) {
-	name, err := productbus.ParseName(db.Name)
+func toBusProduct(row productRow) (productbus.Product, error) {
+	name, err := productbus.ParseName(row.Name)
 	if err != nil {
 		return productbus.Product{}, fmt.Errorf("parse name: %w", err)
 	}
 
 	var imageURL url.URL
-	if db.ImageURL.Valid {
-		imageURLPtr, err := url.Parse(db.ImageURL.String)
+	if row.ImageURL.Valid {
+		imageURLPtr, err := url.Parse(row.ImageURL.String)
 		if err != nil {
 			return productbus.Product{}, fmt.Errorf("parse url: %w", err)
 		}
@@ -50,25 +50,25 @@ func toBusProduct(db product) (productbus.Product, error) {
 	}
 
 	bus := productbus.Product{
-		ID:          db.ID,
+		ID:          row.ID,
 		Name:        name,
-		Description: db.Description.String,
+		Description: row.Description.String,
 		ImageURL:    imageURL,
-		Price:       db.Price,
-		Quantity:    db.Quantity,
-		DateCreated: db.DateCreated.UTC(),
-		DateUpdated: db.DateUpdated.UTC(),
+		Price:       row.Price,
+		Quantity:    row.Quantity,
+		DateCreated: row.DateCreated.UTC(),
+		DateUpdated: row.DateUpdated.UTC(),
 	}
 
 	return bus, nil
 }
 
-func toBusProducts(dbs []product) ([]productbus.Product, error) {
-	bus := make([]productbus.Product, len(dbs))
+func toBusProducts(rows []productRow) ([]productbus.Product, error) {
+	bus := make([]productbus.Product, len(rows))
 
-	for i, db := range dbs {
+	for i, row := range rows {
 		var err error
-		bus[i], err = toBusProduct(db)
+		bus[i], err = toBusProduct(row)
 		if err != nil {
 			return nil, err
 		}

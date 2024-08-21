@@ -96,8 +96,8 @@ func toAppOrderDetail(bus orderbus.OrderWithItems, usr userbus.User) orderDetail
 
 func toAppOrders(bus []orderbus.Order) []order {
 	orders := make([]order, len(bus))
-	for i, v := range bus {
-		orders[i] = toAppOrder(v)
+	for i, ord := range bus {
+		orders[i] = toAppOrder(ord)
 	}
 	return orders
 }
@@ -132,8 +132,8 @@ func toAppOrderItem(bus orderbus.OrderItem) orderItem {
 
 func toAppOrderItems(bus []orderbus.OrderItem) []orderItem {
 	items := make([]orderItem, len(bus))
-	for i, v := range bus {
-		items[i] = toAppOrderItem(v)
+	for i, item := range bus {
+		items[i] = toAppOrderItem(item)
 	}
 	return items
 }
@@ -170,8 +170,8 @@ func toBusNewOrder(app newOrderReq, prodsMap map[uuid.UUID]productbus.Product) (
 func toBusNewOrderItems(app []newOrderItem, prodsMap map[uuid.UUID]productbus.Product) ([]orderbus.NewOrderItem, error) {
 	items := make([]orderbus.NewOrderItem, len(app))
 	var err error
-	for i, v := range app {
-		items[i], err = toBusNewOrderItem(v, prodsMap)
+	for i, item := range app {
+		items[i], err = toBusNewOrderItem(item, prodsMap)
 		if err != nil {
 			return nil, err
 		}

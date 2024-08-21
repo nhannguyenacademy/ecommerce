@@ -67,10 +67,10 @@ func toAppProduct(bus productbus.Product) product {
 	}
 }
 
-func toAppProducts(prds []productbus.Product) []product {
-	app := make([]product, len(prds))
-	for i, usr := range prds {
-		app[i] = toAppProduct(usr)
+func toAppProducts(products []productbus.Product) []product {
+	app := make([]product, len(products))
+	for i, prod := range products {
+		app[i] = toAppProduct(prod)
 	}
 
 	return app
@@ -78,7 +78,7 @@ func toAppProducts(prds []productbus.Product) []product {
 
 // =============================================================================
 
-type newProduct struct {
+type newProductReq struct {
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
 	ImageURL    string `json:"image_url" binding:"omitempty,url"`
@@ -86,7 +86,7 @@ type newProduct struct {
 	Quantity    int32  `json:"quantity" binding:"required,gte=1"`
 }
 
-func toBusNewProduct(app newProduct) (productbus.NewProduct, error) {
+func toBusNewProduct(app newProductReq) (productbus.NewProduct, error) {
 	imageURL, err := url.Parse(app.ImageURL)
 	if err != nil {
 		return productbus.NewProduct{}, fmt.Errorf("parse: %w", err)
@@ -110,7 +110,7 @@ func toBusNewProduct(app newProduct) (productbus.NewProduct, error) {
 
 // =============================================================================
 
-type updateProduct struct {
+type updateProductReq struct {
 	Name        *string `json:"name"`
 	Description *string `json:"description"`
 	ImageURL    *string `json:"image_url" binding:"omitempty,url"`
@@ -118,7 +118,7 @@ type updateProduct struct {
 	Quantity    *int32  `json:"quantity" binding:"omitempty,gte=1"`
 }
 
-func toBusUpdateProduct(app updateProduct) (productbus.UpdateProduct, error) {
+func toBusUpdateProduct(app updateProductReq) (productbus.UpdateProduct, error) {
 	var name *productbus.Name
 	if app.Name != nil {
 		nm, err := productbus.ParseName(*app.Name)

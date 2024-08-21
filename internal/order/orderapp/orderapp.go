@@ -125,7 +125,7 @@ func (a *app) createHandler(c *gin.Context) {
 		productsMap[product.ID] = product
 
 		newQuantity := product.Quantity - itemQuantityMap[product.ID]
-		_, err = a.productBus.Update(ctx, product.ID, productbus.UpdateProduct{
+		_, err = a.productBus.Update(ctx, product, productbus.UpdateProduct{
 			Quantity: &newQuantity,
 		})
 		if err != nil {
