@@ -39,14 +39,14 @@ type authenUser struct {
 
 // =============================================================================
 
-type registerUser struct {
+type registerReq struct {
 	Name            string `json:"name" binding:"required"`
 	Email           string `json:"email" binding:"required,email"`
 	Password        string `json:"password" binding:"required"`
 	PasswordConfirm string `json:"password_confirm" binding:"eqfield=Password"`
 }
 
-func toBusRegisterUser(app registerUser) (userbus.NewUser, error) {
+func toBusRegisterUser(app registerReq) (userbus.NewUser, error) {
 	addr, err := mail.ParseAddress(app.Email)
 	if err != nil {
 		return userbus.NewUser{}, fmt.Errorf("parse: %w", err)
@@ -78,14 +78,14 @@ type loginUser struct {
 
 // =============================================================================
 
-// updateUser defines the data needed to update a user.
-type updateUser struct {
+// updateUserReq defines the data needed to update a user.
+type updateUserReq struct {
 	Name            *string `json:"name"`
 	Password        *string `json:"password"`
 	PasswordConfirm *string `json:"password_confirm" binding:"omitempty,eqfield=Password"`
 }
 
-func toBusUpdateUser(app updateUser) (userbus.UpdateUser, error) {
+func toBusUpdateUser(app updateUserReq) (userbus.UpdateUser, error) {
 	var name *userbus.Name
 	if app.Name != nil {
 		nm, err := userbus.ParseName(*app.Name)

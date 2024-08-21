@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type user struct {
+type userRow struct {
 	ID                uuid.UUID      `db:"user_id"`
 	Name              string         `db:"name"`
 	Email             string         `db:"email"`
@@ -23,8 +23,8 @@ type user struct {
 	DateUpdated       time.Time      `db:"date_updated"`
 }
 
-func toDBUser(bus userbus.User) user {
-	return user{
+func toDBUser(bus userbus.User) userRow {
+	return userRow{
 		ID:                bus.ID,
 		Name:              bus.Name.String(),
 		Email:             bus.Email.Address,
@@ -37,31 +37,31 @@ func toDBUser(bus userbus.User) user {
 	}
 }
 
-func toBusUser(db user) (userbus.User, error) {
+func toBusUser(row userRow) (userbus.User, error) {
 	addr := mail.Address{
-		Address: db.Email,
+		Address: row.Email,
 	}
 
-	roles, err := userbus.ParseRoles(db.Roles)
+	roles, err := userbus.ParseRoles(row.Roles)
 	if err != nil {
 		return userbus.User{}, fmt.Errorf("parse: %w", err)
 	}
 
-	name, err := userbus.ParseName(db.Name)
+	name, err := userbus.ParseName(row.Name)
 	if err != nil {
 		return userbus.User{}, fmt.Errorf("parse name: %w", err)
 	}
 
 	bus := userbus.User{
-		ID:                db.ID,
+		ID:                row.ID,
 		Name:              name,
 		Email:             addr,
 		Roles:             roles,
-		PasswordHash:      db.PasswordHash,
-		Enabled:           db.Enabled,
-		EmailConfirmToken: db.EmailConfirmToken.String,
-		DateCreated:       db.DateCreated.UTC(),
-		DateUpdated:       db.DateUpdated.UTC(),
+		PasswordHash:      row.PasswordHash,
+		Enabled:           row.Enabled,
+		EmailConfirmToken: row.EmailConfirmToken.String,
+		DateCreated:       row.DateCreated.UTC(),
+		DateUpdated:       row.DateUpdated.UTC(),
 	}
 
 	return bus, nil
