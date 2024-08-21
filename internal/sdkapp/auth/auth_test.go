@@ -69,7 +69,7 @@ func test1(ath *auth.Auth) func(t *testing.T) {
 			t.Error("Should NOT be able to authorize the Roles.User claim")
 		}
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.Rules.AdminOrSubject)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.Rules.AdminOrOwner)
 		if err != nil {
 			t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with Roles.Admin only : %s", err)
 		}
@@ -112,7 +112,7 @@ func test2(ath *auth.Auth) func(t *testing.T) {
 			t.Error("Should NOT be able to authorize the RuleAdminOnly claim with Roles.User only")
 		}
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.Rules.AdminOrSubject)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.Rules.AdminOrOwner)
 		if err != nil {
 			t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with Roles.User only : %s", err)
 		}
@@ -150,7 +150,7 @@ func test3(ath *auth.Auth) func(t *testing.T) {
 
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.Rules.AdminOrSubject)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.Rules.AdminOrOwner)
 		if err == nil {
 			t.Error("Should NOT be able to authorize the RuleAdminOrSubject claim with Roles.User only and different userID")
 		}

@@ -2,7 +2,9 @@
 package respond
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"net/http"
@@ -42,6 +44,15 @@ func Error(c *gin.Context, log *logger.Logger, err error) {
 		log.Warn(ctx, "respond error: failed to add error to gin context", "error", cErr, "original error", err)
 	}
 
-	appErr := errs.NewError(err)
+	var (
+		appErr *errs.Error
+		vErrs  validator.ValidationErrors
+	)
+	if errors.As(err, &vErrs) {
+		appErr = errs.Newf(errs.InvalidArgument, "%s", vErrs)
+	} else {
+		appErr = errs.NewError(err)
+	}
+
 	c.AbortWithStatusJSON(appErr.HTTPStatus(), appErr)
 }

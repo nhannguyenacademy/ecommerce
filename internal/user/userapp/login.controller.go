@@ -3,7 +3,6 @@ package userapp
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
@@ -18,11 +17,6 @@ func (a *app) loginController(c *gin.Context) {
 
 	var req loginUser
 	if err := c.ShouldBindJSON(&req); err != nil {
-		var vErrs validator.ValidationErrors
-		if errors.As(err, &vErrs) {
-			err = errs.Newf(errs.InvalidArgument, "%s", vErrs)
-		}
-
 		respond.Error(c, a.log, err)
 		return
 	}
@@ -35,13 +29,11 @@ func (a *app) loginController(c *gin.Context) {
 
 	usr, err := a.userBus.Authenticate(ctx, *addr, req.Password)
 	if err != nil {
-		var appErr *errs.Error
 		if errors.Is(err, userbus.ErrAuthenticationFailure) {
-			appErr = errs.New(errs.Unauthenticated, err)
+			respond.Error(c, a.log, errs.New(errs.Unauthenticated, err))
 		} else {
-			appErr = errs.New(errs.Internal, err)
+			respond.Error(c, a.log, errs.New(errs.Internal, err))
 		}
-		respond.Error(c, a.log, appErr)
 		return
 	}
 

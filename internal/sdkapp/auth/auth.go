@@ -168,9 +168,13 @@ func (a *Auth) Authorize(_ context.Context, claims Claims, userID uuid.UUID, rul
 		if !roles.Contains(userbus.Roles.User) {
 			return fmt.Errorf("rule_user_only: %w", ErrForbidden)
 		}
-	case Rules.AdminOrSubject:
+	case Rules.Owner:
+		if claims.Subject != userID.String() {
+			return fmt.Errorf("rule_owner: %w", ErrForbidden)
+		}
+	case Rules.AdminOrOwner:
 		if !roles.Contains(userbus.Roles.Admin) && claims.Subject != userID.String() {
-			return fmt.Errorf("rule_admin_or_subject: %w", ErrForbidden)
+			return fmt.Errorf("rule_admin_or_owner: %w", ErrForbidden)
 		}
 	default:
 		return fmt.Errorf("unknown rule: %s", rule)

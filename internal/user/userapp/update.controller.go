@@ -1,9 +1,7 @@
 package userapp
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
@@ -14,11 +12,6 @@ func (a *app) updateController(c *gin.Context) {
 
 	var req updateUser
 	if err := c.ShouldBindJSON(&req); err != nil {
-		var vErrs validator.ValidationErrors
-		if errors.As(err, &vErrs) {
-			err = errs.Newf(errs.InvalidArgument, "%s", vErrs)
-		}
-
 		respond.Error(c, a.log, err)
 		return
 	}

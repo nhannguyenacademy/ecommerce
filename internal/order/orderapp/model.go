@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/nhannguyenacademy/ecommerce/internal/order/orderbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
+	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
 	"net/http"
 	"time"
 )
@@ -41,6 +43,15 @@ func parseQueryParams(r *http.Request) queryParams {
 // ===================================================
 
 type order struct {
+	ID          string `json:"id"`
+	UserID      string `json:"user_id"`
+	Amount      int64  `json:"amount"`
+	Status      string `json:"status"`
+	DateCreated string `json:"date_created"`
+	DateUpdated string `json:"date_updated"`
+}
+
+type orderDetail struct {
 	ID          string      `json:"id"`
 	UserID      string      `json:"user_id"`
 	Amount      int64       `json:"amount"`
@@ -48,6 +59,12 @@ type order struct {
 	DateCreated string      `json:"date_created"`
 	DateUpdated string      `json:"date_updated"`
 	Items       []orderItem `json:"items"`
+	User        userInfo    `json:"user"`
+}
+
+type userInfo struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 func toAppOrder(bus orderbus.Order) order {
@@ -58,31 +75,50 @@ func toAppOrder(bus orderbus.Order) order {
 		Status:      bus.Status.String(),
 		DateCreated: bus.DateCreated.Format(time.RFC3339),
 		DateUpdated: bus.DateUpdated.Format(time.RFC3339),
+	}
+}
+
+func toAppOrderDetail(bus orderbus.OrderWithItems, usr userbus.User) orderDetail {
+	return orderDetail{
+		ID:          bus.ID.String(),
+		UserID:      bus.UserID.String(),
+		Amount:      bus.Amount,
+		Status:      bus.Status.String(),
+		DateCreated: bus.DateCreated.Format(time.RFC3339),
+		DateUpdated: bus.DateUpdated.Format(time.RFC3339),
 		Items:       toAppOrderItems(bus.Items),
+		User: userInfo{
+			Name:  usr.Name.String(),
+			Email: usr.Email.String(),
+		},
 	}
 }
 
 // ===================================================
 
 type orderItem struct {
-	ID          string `json:"id"`
-	OrderID     string `json:"order_id"`
-	ProductID   string `json:"product_id"`
-	Price       int64  `json:"price"`
-	Quantity    int32  `json:"quantity"`
-	DateCreated string `json:"date_created"`
-	DateUpdated string `json:"date_updated"`
+	ID              string `json:"id"`
+	OrderID         string `json:"order_id"`
+	ProductID       string `json:"product_id"`
+	ProductName     string `json:"product_name"`
+	ProductImageUrl string `json:"product_image_url"`
+	Price           int64  `json:"price"`
+	Quantity        int32  `json:"quantity"`
+	DateCreated     string `json:"date_created"`
+	DateUpdated     string `json:"date_updated"`
 }
 
 func toAppOrderItem(bus orderbus.OrderItem) orderItem {
 	return orderItem{
-		ID:          bus.ID.String(),
-		OrderID:     bus.OrderID.String(),
-		ProductID:   bus.ProductID.String(),
-		Price:       bus.Price,
-		Quantity:    bus.Quantity,
-		DateCreated: bus.DateCreated.Format(time.RFC3339),
-		DateUpdated: bus.DateUpdated.Format(time.RFC3339),
+		ID:              bus.ID.String(),
+		OrderID:         bus.OrderID.String(),
+		ProductID:       bus.ProductID.String(),
+		ProductName:     bus.ProductName,
+		ProductImageUrl: bus.ProductImageURL.String(),
+		Price:           bus.Price,
+		Quantity:        bus.Quantity,
+		DateCreated:     bus.DateCreated.Format(time.RFC3339),
+		DateUpdated:     bus.DateUpdated.Format(time.RFC3339),
 	}
 }
 
@@ -106,13 +142,13 @@ type newOrderItem struct {
 	Quantity  int32  `json:"quantity"`
 }
 
-func toBusNewOrder(app newOrder) (orderbus.NewOrder, error) {
+func toBusNewOrder(app newOrder, prodsMap map[uuid.UUID]productbus.Product) (orderbus.NewOrder, error) {
 	userID, err := uuid.Parse(app.UserID)
 	if err != nil {
 		return orderbus.NewOrder{}, errs.New(errs.InvalidArgument, fmt.Errorf("parsing user id: %w", err))
 	}
 
-	items, err := toBusNewOrderItems(app.Items)
+	items, err := toBusNewOrderItems(app.Items, prodsMap)
 	if err != nil {
 		return orderbus.NewOrder{}, err
 	}
@@ -123,11 +159,11 @@ func toBusNewOrder(app newOrder) (orderbus.NewOrder, error) {
 	}, nil
 }
 
-func toBusNewOrderItems(app []newOrderItem) ([]orderbus.NewOrderItem, error) {
+func toBusNewOrderItems(app []newOrderItem, prodsMap map[uuid.UUID]productbus.Product) ([]orderbus.NewOrderItem, error) {
 	items := make([]orderbus.NewOrderItem, len(app))
 	var err error
 	for i, v := range app {
-		items[i], err = toBusNewOrderItem(v)
+		items[i], err = toBusNewOrderItem(v, prodsMap)
 		if err != nil {
 			return nil, err
 		}
@@ -135,14 +171,23 @@ func toBusNewOrderItems(app []newOrderItem) ([]orderbus.NewOrderItem, error) {
 	return items, nil
 }
 
-func toBusNewOrderItem(app newOrderItem) (orderbus.NewOrderItem, error) {
+func toBusNewOrderItem(app newOrderItem, prodsMap map[uuid.UUID]productbus.Product) (orderbus.NewOrderItem, error) {
 	productID, err := uuid.Parse(app.ProductID)
 	if err != nil {
 		return orderbus.NewOrderItem{}, fmt.Errorf("parsing product id: %w", err)
 	}
 
 	return orderbus.NewOrderItem{
-		ProductID: productID,
-		Quantity:  app.Quantity,
+		ProductID:       productID,
+		Quantity:        app.Quantity,
+		ProductName:     prodsMap[productID].Name.String(),
+		ProductImageURL: prodsMap[productID].ImageURL,
+		Price:           prodsMap[productID].Price,
 	}, nil
+}
+
+// ===================================================
+
+type updateOrderStatus struct {
+	Status string `json:"status" binding:"required"`
 }

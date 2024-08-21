@@ -12,7 +12,7 @@ func (a *app) deleteController(c *gin.Context) {
 
 	id, err := uuid.Parse(c.Param("product_id"))
 	if err != nil {
-		respond.Error(c, a.log, errs.Newf(errs.InvalidArgument, "invalid product id: %s", err))
+		respond.Error(c, a.log, errs.Newf(errs.InvalidArgument, "invalid id: %s", err))
 		return
 	}
 

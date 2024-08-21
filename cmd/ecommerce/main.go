@@ -158,7 +158,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	productBus := productbus.NewBusiness(log, productdb.NewStore(log, db))
 
-	orderBus := orderbus.NewBusiness(log, orderdb.NewStore(log, db), productBus)
+	orderBus := orderbus.NewBusiness(log, orderdb.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
 	// Start API Service
@@ -177,7 +177,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	apiV1Router.Use(mid.Logging(log, []string{}), mid.Panic(log))
 	userapp.New(log, ath, cfg.Auth.ActiveKID, userBus).Routes(apiV1Router)
 	productapp.New(log, ath, productBus).Routes(apiV1Router)
-	orderapp.New(log, ath, sqldb.NewBeginner(db), orderBus).Routes(apiV1Router)
+	orderapp.New(log, ath, sqldb.NewBeginner(db), orderBus, productBus, userBus).Routes(apiV1Router)
 
 	// Construct API server
 	api := http.Server{

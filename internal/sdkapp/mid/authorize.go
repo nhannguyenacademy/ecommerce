@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/nhannguyenacademy/ecommerce/internal/order/orderbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
@@ -64,6 +65,47 @@ func AuthorizeUser(l *logger.Logger, auth *auth.Auth, userBus *userbus.Business,
 			}
 
 			ctx = setUser(ctx, usr)
+		}
+
+		claims := GetClaims(ctx)
+		if err := auth.Authorize(ctx, claims, userID, rule); err != nil {
+			respond.Error(c, l, errs.New(errs.Unauthenticated, err))
+			return
+		}
+
+		c.Request = c.Request.WithContext(ctx)
+		c.Next()
+	}
+}
+
+func AuthorizeOrder(l *logger.Logger, auth *auth.Auth, orderBus *orderbus.Business, rule auth.Rule) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		var userID uuid.UUID
+
+		id := c.Param("order_id")
+		if id != "" {
+			var err error
+			orderID, err := uuid.Parse(id)
+			if err != nil {
+				respond.Error(c, l, errs.New(errs.Unauthenticated, ErrInvalidID))
+				return
+			}
+
+			ord, err := orderBus.QueryByID(ctx, orderID)
+			if err != nil {
+				switch {
+				case errors.Is(err, userbus.ErrNotFound):
+					respond.Error(c, l, errs.New(errs.Unauthenticated, err))
+					return
+				default:
+					respond.Error(c, l, errs.Newf(errs.Unauthenticated, "querybyid: ordID[%s]: %s", orderID, err))
+					return
+				}
+			}
+
+			userID = ord.UserID
+			ctx = setOrder(ctx, ord)
 		}
 
 		claims := GetClaims(ctx)

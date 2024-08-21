@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
+	"github.com/nhannguyenacademy/ecommerce/internal/order/orderbus"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
 	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
@@ -17,6 +18,7 @@ const (
 	userIDKey
 	userKey
 	trKey
+	orderKey
 )
 
 func setClaims(ctx context.Context, claims auth.Claims) context.Context {
@@ -55,6 +57,19 @@ func GetUser(ctx context.Context) (userbus.User, error) {
 	v, ok := ctx.Value(userKey).(userbus.User)
 	if !ok {
 		return userbus.User{}, errors.New("user not found in context")
+	}
+
+	return v, nil
+}
+
+func setOrder(ctx context.Context, ord orderbus.Order) context.Context {
+	return context.WithValue(ctx, orderKey, ord)
+}
+
+func GetOrder(ctx context.Context) (orderbus.Order, error) {
+	v, ok := ctx.Value(orderKey).(orderbus.Order)
+	if !ok {
+		return orderbus.Order{}, errors.New("order not found in context")
 	}
 
 	return v, nil

@@ -18,13 +18,11 @@ func (a *app) confirmEmailController(c *gin.Context) {
 
 	err := a.userBus.ConfirmEmail(ctx, confirmToken)
 	if err != nil {
-		var appErr *errs.Error
 		if errors.Is(err, userbus.ErrNotFound) {
-			appErr = errs.New(errs.InvalidArgument, err)
+			respond.Error(c, a.log, errs.New(errs.InvalidArgument, err))
 		} else {
-			appErr = errs.Newf(errs.Internal, "confirmEmail: confirmToken[%s]: %s", confirmToken, err)
+			respond.Error(c, a.log, errs.Newf(errs.Internal, "confirmEmail: confirmToken[%s]: %s", confirmToken, err))
 		}
-		respond.Error(c, a.log, appErr)
 		return
 	}
 

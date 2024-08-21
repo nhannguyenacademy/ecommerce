@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS order_items (
   order_item_id     UUID        NOT NULL,
   order_id          UUID        NOT NULL,
   product_id        UUID        NOT NULL,
+  product_name      TEXT        NOT NULL,
+  product_image_url TEXT        NOT NULL,
   price             BIGINT      NOT NULL,
   quantity          INT         NOT NULL,
   date_created      TIMESTAMP   NOT NULL,

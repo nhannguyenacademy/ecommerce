@@ -25,17 +25,19 @@ func newRule(rule string) Rule {
 }
 
 type ruleSet struct {
-	Any            Rule
-	Admin          Rule
-	User           Rule
-	AdminOrSubject Rule
+	Any          Rule
+	Admin        Rule
+	User         Rule
+	AdminOrOwner Rule
+	Owner        Rule
 }
 
 var Rules = ruleSet{
-	Any:            newRule("rule_any"),
-	Admin:          newRule("rule_admin_only"),
-	User:           newRule("rule_user_only"),
-	AdminOrSubject: newRule("rule_admin_or_subject"),
+	Any:          newRule("rule_any"),
+	Admin:        newRule("rule_admin_only"),
+	User:         newRule("rule_user_only"),
+	AdminOrOwner: newRule("rule_admin_or_owner"),
+	Owner:        newRule("rule_owner"),
 }
 
 // =============================================================================
