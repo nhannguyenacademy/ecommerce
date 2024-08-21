@@ -99,7 +99,7 @@ func AuthorizeOrder(l *logger.Logger, auth *auth.Auth, orderBus *orderbus.Busine
 					respond.Error(c, l, errs.New(errs.Unauthenticated, err))
 					return
 				default:
-					respond.Error(c, l, errs.Newf(errs.Unauthenticated, "querybyid: ordID[%s]: %s", orderID, err))
+					respond.Error(c, l, errs.Newf(errs.Unauthenticated, "querybyid: orderID[%s]: %s", orderID, err))
 					return
 				}
 			}

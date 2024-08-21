@@ -48,28 +48,28 @@ func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (orderbus.Storer, error) {
 // ========================================================
 // Orders
 
-func (s *Store) Create(ctx context.Context, ord orderbus.Order) error {
+func (s *Store) Create(ctx context.Context, order orderbus.Order) error {
 	const ordQ = `
 	INSERT INTO orders
 		(order_id, user_id, amount, status, date_created, date_updated)
 	VALUES
 		(:order_id, :user_id, :amount, :status, :date_created, :date_updated)`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, ordQ, toDBOrder(ord)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, ordQ, toDBOrder(order)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
 	return nil
 }
 
-func (s *Store) Delete(ctx context.Context, ord orderbus.Order) error {
+func (s *Store) Delete(ctx context.Context, order orderbus.Order) error {
 	const q = `
 	DELETE FROM
 		orders
 	WHERE
 		order_id = :order_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBOrder(ord)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBOrder(order)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -82,13 +82,13 @@ func (s *Store) Query(ctx context.Context, filter orderbus.QueryFilter, sortBy s
 		"rows_per_page": page.RowsPerPage(),
 	}
 
-	const ordQ = `
+	const q = `
 	SELECT
 		order_id, user_id, amount, status, date_created, date_updated
 	FROM
 		orders`
 
-	buf := bytes.NewBufferString(ordQ)
+	buf := bytes.NewBufferString(q)
 	applyFilter(filter, data, buf)
 
 	orderByClause, err := orderByClause(sortBy)
@@ -99,12 +99,12 @@ func (s *Store) Query(ctx context.Context, filter orderbus.QueryFilter, sortBy s
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dbOrds []order
-	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbOrds); err != nil {
+	var rows []orderRow
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &rows); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toBusOrders(dbOrds)
+	return toBusOrders(rows)
 }
 
 func (s *Store) Count(ctx context.Context, filter orderbus.QueryFilter) (int, error) {
@@ -129,14 +129,14 @@ func (s *Store) Count(ctx context.Context, filter orderbus.QueryFilter) (int, er
 	return count.Count, nil
 }
 
-func (s *Store) QueryByID(ctx context.Context, ordID uuid.UUID) (orderbus.Order, error) {
+func (s *Store) QueryByID(ctx context.Context, orderID uuid.UUID) (orderbus.Order, error) {
 	// ==========================================================
 	// Get order
 
 	data := struct {
 		ID string `db:"order_id"`
 	}{
-		ID: ordID.String(),
+		ID: orderID.String(),
 	}
 
 	const q = `
@@ -147,25 +147,25 @@ func (s *Store) QueryByID(ctx context.Context, ordID uuid.UUID) (orderbus.Order,
 	WHERE 
 		order_id = :order_id`
 
-	var dbOrd order
-	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbOrd); err != nil {
+	var row orderRow
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &row); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return orderbus.Order{}, fmt.Errorf("db: %w", orderbus.ErrNotFound)
 		}
 		return orderbus.Order{}, fmt.Errorf("db: %w", err)
 	}
 
-	return toBusOrder(dbOrd)
+	return toBusOrder(row)
 }
 
-func (s *Store) UpdateStatus(ctx context.Context, ord orderbus.Order, status orderbus.Status) error {
-	uo := struct {
+func (s *Store) UpdateStatus(ctx context.Context, order orderbus.Order, status orderbus.Status) error {
+	data := struct {
 		OrderID   uuid.UUID `db:"order_id"`
 		Status    string    `db:"status"`
 		NewStatus string    `db:"new_status"`
 	}{
-		OrderID:   ord.ID,
-		Status:    ord.Status.String(),
+		OrderID:   order.ID,
+		Status:    order.Status.String(),
 		NewStatus: status.String(),
 	}
 
@@ -174,7 +174,7 @@ func (s *Store) UpdateStatus(ctx context.Context, ord orderbus.Order, status ord
 	SET status = :new_status
 	WHERE order_id = :order_id AND status = :status`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, uo); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, data); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -184,7 +184,7 @@ func (s *Store) UpdateStatus(ctx context.Context, ord orderbus.Order, status ord
 // ========================================================
 // Order Items
 
-func (s *Store) QueryOrderItems(ctx context.Context, ord orderbus.Order) ([]orderbus.OrderItem, error) {
+func (s *Store) QueryOrderItems(ctx context.Context, order orderbus.Order) ([]orderbus.OrderItem, error) {
 	const itmQ = `
 	SELECT
 		order_item_id, order_id, product_id, product_name, product_image_url, price, quantity, date_created, date_updated
@@ -193,61 +193,36 @@ func (s *Store) QueryOrderItems(ctx context.Context, ord orderbus.Order) ([]orde
 	WHERE
 		order_id = :order_id`
 
-	var dbItms []orderItem
-	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, itmQ, toDBOrder(ord), &dbItms); err != nil {
+	var rows []orderItemRow
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, itmQ, toDBOrder(order), &rows); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toBusOrderItems(dbItms)
+	return toBusOrderItems(rows)
 }
 
-//func (s *Store) QueryOrdersItems(ctx context.Context, ords []orderbus.Order) ([]orderbus.OrderItem, error) {
-//	const itmQ = `
-//	SELECT
-//		order_item_id, order_id, product_id, product_name, product_image_url, price, quantity, date_created, date_updated
-//	FROM
-//		order_items
-//	WHERE
-//		order_id IN (:order_ids)`
-//
-//	ordIDs := make([]string, len(ords))
-//	for i, dbOrd := range ords {
-//		ordIDs[i] = dbOrd.ID.String()
-//	}
-//
-//	inData := map[string]any{
-//		"order_ids": ordIDs,
-//	}
-//	var dbItms []orderItem
-//	if err := sqldb.NamedQuerySliceUsingIn(ctx, s.log, s.db, itmQ, inData, &dbItms); err != nil {
-//		return nil, fmt.Errorf("namedqueryslice: %w", err)
-//	}
-//
-//	return toBusOrderItems(dbItms)
-//}
-
-func (s *Store) DeleteOrderItems(ctx context.Context, ord orderbus.Order) error {
+func (s *Store) DeleteOrderItems(ctx context.Context, order orderbus.Order) error {
 	const q = `
 	DELETE FROM
 		order_items
 	WHERE
 		order_id = :order_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBOrder(ord)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBOrder(order)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
 	return nil
 }
 
-func (s *Store) CreateOrderItems(ctx context.Context, itms []orderbus.OrderItem) error {
+func (s *Store) CreateOrderItems(ctx context.Context, items []orderbus.OrderItem) error {
 	const ordItmQ = `
 	INSERT INTO order_items
 		(order_item_id, order_id, product_id, product_name, product_image_url, price, quantity, date_created, date_updated)
 	VALUES
 		(:order_item_id, :order_id, :product_id, :product_name, :product_image_url, :price, :quantity, :date_created, :date_updated)`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, ordItmQ, toDBOrderItems(itms)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, ordItmQ, toDBOrderItems(items)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 

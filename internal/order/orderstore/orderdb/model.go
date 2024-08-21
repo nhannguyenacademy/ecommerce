@@ -10,7 +10,7 @@ import (
 
 // ========================================================
 
-type order struct {
+type orderRow struct {
 	ID          uuid.UUID `db:"order_id"`
 	UserID      uuid.UUID `db:"user_id"`
 	Amount      int64     `db:"amount"`
@@ -19,8 +19,8 @@ type order struct {
 	DateUpdated time.Time `db:"date_updated"`
 }
 
-func toDBOrder(bus orderbus.Order) order {
-	ord := order{
+func toDBOrder(bus orderbus.Order) orderRow {
+	return orderRow{
 		ID:          bus.ID,
 		UserID:      bus.UserID,
 		Amount:      bus.Amount,
@@ -28,45 +28,43 @@ func toDBOrder(bus orderbus.Order) order {
 		DateCreated: bus.DateCreated.UTC(),
 		DateUpdated: bus.DateUpdated.UTC(),
 	}
-
-	return ord
 }
 
-func toBusOrder(db order) (orderbus.Order, error) {
-	ordStatus, err := orderbus.ParseStatus(db.Status)
+func toBusOrder(row orderRow) (orderbus.Order, error) {
+	orderStatus, err := orderbus.ParseStatus(row.Status)
 	if err != nil {
 		return orderbus.Order{}, fmt.Errorf("parse status: %w", err)
 	}
 
 	bus := orderbus.Order{
-		ID:          db.ID,
-		UserID:      db.UserID,
-		Amount:      db.Amount,
-		Status:      ordStatus,
-		DateCreated: db.DateCreated.UTC(),
-		DateUpdated: db.DateUpdated.UTC(),
+		ID:          row.ID,
+		UserID:      row.UserID,
+		Amount:      row.Amount,
+		Status:      orderStatus,
+		DateCreated: row.DateCreated.UTC(),
+		DateUpdated: row.DateUpdated.UTC(),
 	}
 
 	return bus, nil
 }
 
-func toBusOrders(dbOrds []order) ([]orderbus.Order, error) {
-	ords := make([]orderbus.Order, len(dbOrds))
-	for i, dbOrd := range dbOrds {
-		ord, err := toBusOrder(dbOrd)
+func toBusOrders(rows []orderRow) ([]orderbus.Order, error) {
+	orders := make([]orderbus.Order, len(rows))
+	for i, row := range rows {
+		ord, err := toBusOrder(row)
 		if err != nil {
 			return nil, fmt.Errorf("to bus order: %w", err)
 		}
 
-		ords[i] = ord
+		orders[i] = ord
 	}
 
-	return ords, nil
+	return orders, nil
 }
 
 // ========================================================
 
-type orderItem struct {
+type orderItemRow struct {
 	ID              uuid.UUID `db:"order_item_id"`
 	OrderID         uuid.UUID `db:"order_id"`
 	ProductID       uuid.UUID `db:"product_id"`
@@ -78,8 +76,8 @@ type orderItem struct {
 	DateUpdated     time.Time `db:"date_updated"`
 }
 
-func toDBOrderItem(bus orderbus.OrderItem) orderItem {
-	return orderItem{
+func toDBOrderItem(bus orderbus.OrderItem) orderItemRow {
+	return orderItemRow{
 		ID:              bus.ID,
 		OrderID:         bus.OrderID,
 		ProductID:       bus.ProductID,
@@ -92,39 +90,39 @@ func toDBOrderItem(bus orderbus.OrderItem) orderItem {
 	}
 }
 
-func toDBOrderItems(busItms []orderbus.OrderItem) []orderItem {
-	itms := make([]orderItem, len(busItms))
-	for i, busItm := range busItms {
-		itms[i] = toDBOrderItem(busItm)
+func toDBOrderItems(items []orderbus.OrderItem) []orderItemRow {
+	rows := make([]orderItemRow, len(items))
+	for i, item := range items {
+		rows[i] = toDBOrderItem(item)
 	}
 
-	return itms
+	return rows
 }
 
-func toBusOrderItem(db orderItem) (orderbus.OrderItem, error) {
-	productImageURL, err := url.Parse(db.ProductImageURL)
+func toBusOrderItem(row orderItemRow) (orderbus.OrderItem, error) {
+	productImageURL, err := url.Parse(row.ProductImageURL)
 	if err != nil {
 		return orderbus.OrderItem{}, fmt.Errorf("parse product image url: %w", err)
 	}
 
-	itm := orderbus.OrderItem{
-		ID:              db.ID,
-		ProductID:       db.ProductID,
-		ProductName:     db.ProductName,
+	item := orderbus.OrderItem{
+		ID:              row.ID,
+		ProductID:       row.ProductID,
+		ProductName:     row.ProductName,
 		ProductImageURL: *productImageURL,
-		Price:           db.Price,
-		Quantity:        db.Quantity,
-		DateCreated:     db.DateCreated.UTC(),
-		DateUpdated:     db.DateUpdated.UTC(),
+		Price:           row.Price,
+		Quantity:        row.Quantity,
+		DateCreated:     row.DateCreated.UTC(),
+		DateUpdated:     row.DateUpdated.UTC(),
 	}
 
-	return itm, nil
+	return item, nil
 }
 
-func toBusOrderItems(dbItems []orderItem) ([]orderbus.OrderItem, error) {
-	items := make([]orderbus.OrderItem, len(dbItems))
-	for i, dbItem := range dbItems {
-		item, err := toBusOrderItem(dbItem)
+func toBusOrderItems(rows []orderItemRow) ([]orderbus.OrderItem, error) {
+	items := make([]orderbus.OrderItem, len(rows))
+	for i, row := range rows {
+		item, err := toBusOrderItem(row)
 		if err != nil {
 			return nil, fmt.Errorf("to bus order item: %w", err)
 		}

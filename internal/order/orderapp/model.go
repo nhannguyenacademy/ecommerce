@@ -140,7 +140,7 @@ func toAppOrderItems(bus []orderbus.OrderItem) []orderItem {
 
 // ===================================================
 
-type newOrder struct {
+type newOrderReq struct {
 	UserID string         `json:"user_id"`
 	Items  []newOrderItem `json:"items"`
 }
@@ -150,7 +150,7 @@ type newOrderItem struct {
 	Quantity  int32  `json:"quantity"`
 }
 
-func toBusNewOrder(app newOrder, prodsMap map[uuid.UUID]productbus.Product) (orderbus.NewOrder, error) {
+func toBusNewOrder(app newOrderReq, prodsMap map[uuid.UUID]productbus.Product) (orderbus.NewOrder, error) {
 	userID, err := uuid.Parse(app.UserID)
 	if err != nil {
 		return orderbus.NewOrder{}, errs.New(errs.InvalidArgument, fmt.Errorf("parsing user id: %w", err))
@@ -196,6 +196,6 @@ func toBusNewOrderItem(app newOrderItem, prodsMap map[uuid.UUID]productbus.Produ
 
 // ===================================================
 
-type updateOrderStatus struct {
+type updateOrderStatusReq struct {
 	Status string `json:"status" binding:"required"`
 }

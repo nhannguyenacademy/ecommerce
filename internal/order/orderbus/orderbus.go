@@ -21,16 +21,16 @@ var (
 
 type Storer interface {
 	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
-	Create(ctx context.Context, ord Order) error
-	UpdateStatus(ctx context.Context, ord Order, status Status) error
+	Create(ctx context.Context, order Order) error
+	UpdateStatus(ctx context.Context, order Order, status Status) error
 	Query(ctx context.Context, filter QueryFilter, sortBy sort.By, page page.Page) ([]Order, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
-	QueryByID(ctx context.Context, ordID uuid.UUID) (Order, error)
-	Delete(ctx context.Context, ord Order) error
+	QueryByID(ctx context.Context, orderID uuid.UUID) (Order, error)
+	Delete(ctx context.Context, order Order) error
 
-	QueryOrderItems(ctx context.Context, ord Order) ([]OrderItem, error)
-	DeleteOrderItems(ctx context.Context, ord Order) error
-	CreateOrderItems(ctx context.Context, itms []OrderItem) error
+	QueryOrderItems(ctx context.Context, order Order) ([]OrderItem, error)
+	DeleteOrderItems(ctx context.Context, order Order) error
+	CreateOrderItems(ctx context.Context, items []OrderItem) error
 }
 
 // Business manages the set of APIs for user access.
@@ -40,37 +40,37 @@ type Business struct {
 }
 
 // NewBusiness constructs a business API for use.
-func NewBusiness(log *logger.Logger, orderStorer Storer) *Business {
+func NewBusiness(log *logger.Logger, storer Storer) *Business {
 	return &Business{
 		log:    log,
-		storer: orderStorer,
+		storer: storer,
 	}
 }
 
 func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
-	orderStorer, err := b.storer.NewWithTx(tx)
+	storerTx, err := b.storer.NewWithTx(tx)
 	if err != nil {
 		return nil, err
 	}
 
 	bus := Business{
 		log:    b.log,
-		storer: orderStorer,
+		storer: storerTx,
 	}
 
 	return &bus, nil
 }
 
-func (b *Business) Delete(ctx context.Context, ord Order) error {
-	if ord.Status.Equal(Statuses.Finished) {
-		return fmt.Errorf("order %s: %w", ord.ID, ErrOrderAlreadyFinished)
+func (b *Business) Delete(ctx context.Context, order Order) error {
+	if order.Status.Equal(Statuses.Finished) {
+		return fmt.Errorf("order %s: %w", order.ID, ErrOrderAlreadyFinished)
 	}
 
-	if err := b.storer.Delete(ctx, ord); err != nil {
+	if err := b.storer.Delete(ctx, order); err != nil {
 		return fmt.Errorf("delete order: %w", err)
 	}
 
-	if err := b.storer.DeleteOrderItems(ctx, ord); err != nil {
+	if err := b.storer.DeleteOrderItems(ctx, order); err != nil {
 		return fmt.Errorf("delete order items: %w", err)
 	}
 
@@ -78,49 +78,49 @@ func (b *Business) Delete(ctx context.Context, ord Order) error {
 }
 
 func (b *Business) QueryByID(ctx context.Context, id uuid.UUID) (Order, error) {
-	ord, err := b.storer.QueryByID(ctx, id)
+	order, err := b.storer.QueryByID(ctx, id)
 	if err != nil {
 		return Order{}, fmt.Errorf("query: id[%s]: %w", id, err)
 	}
 
-	return ord, nil
+	return order, nil
 }
 
 func (b *Business) QueryByIDWithItems(ctx context.Context, id uuid.UUID) (OrderWithItems, error) {
-	ord, err := b.storer.QueryByID(ctx, id)
+	order, err := b.storer.QueryByID(ctx, id)
 	if err != nil {
 		return OrderWithItems{}, fmt.Errorf("query: id[%s]: %w", id, err)
 	}
 
-	itms, err := b.storer.QueryOrderItems(ctx, ord)
+	items, err := b.storer.QueryOrderItems(ctx, order)
 	if err != nil {
 		return OrderWithItems{}, fmt.Errorf("query order items: %w", err)
 	}
 
 	return OrderWithItems{
-		Order: ord,
-		Items: itms,
+		Order: order,
+		Items: items,
 	}, nil
 }
 
-func (b *Business) UpdateStatus(ctx context.Context, ord Order, status Status) (Order, error) {
-	if ord.Status.Equal(status) {
-		return ord, nil
+func (b *Business) UpdateStatus(ctx context.Context, order Order, status Status) (Order, error) {
+	if order.Status.Equal(status) {
+		return order, nil
 	}
 
-	if ord.Status.Equal(Statuses.Finished) {
-		return ord, fmt.Errorf("order %s: %w", ord.ID, ErrOrderAlreadyFinished)
+	if order.Status.Equal(Statuses.Finished) {
+		return order, fmt.Errorf("order %s: %w", order.ID, ErrOrderAlreadyFinished)
 	}
 
-	if ord.Status.Equal(Statuses.Cancelled) {
-		return ord, fmt.Errorf("order %s: %w", ord.ID, ErrOrderAlreadyCancelled)
+	if order.Status.Equal(Statuses.Cancelled) {
+		return order, fmt.Errorf("order %s: %w", order.ID, ErrOrderAlreadyCancelled)
 	}
 
-	if err := b.storer.UpdateStatus(ctx, ord, status); err != nil {
+	if err := b.storer.UpdateStatus(ctx, order, status); err != nil {
 		return Order{}, fmt.Errorf("update status: %w", err)
 	}
 
-	return ord, nil
+	return order, nil
 }
 
 func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
@@ -136,43 +136,43 @@ func (b *Business) Query(ctx context.Context, filter QueryFilter, sortBy sort.By
 	return ords, nil
 }
 
-func (b *Business) Create(ctx context.Context, input NewOrder) (Order, error) {
+func (b *Business) Create(ctx context.Context, newOrder NewOrder) (Order, error) {
 	var (
 		orderAmount int64
-		ordID       = uuid.New()
-		ordItms     = make([]OrderItem, len(input.Items))
+		orderID     = uuid.New()
+		orderItems  = make([]OrderItem, len(newOrder.Items))
 		now         = time.Now()
 	)
 
-	for i, itm := range input.Items {
-		ordItms[i] = OrderItem{
+	for i, item := range newOrder.Items {
+		orderItems[i] = OrderItem{
 			ID:          uuid.New(),
-			OrderID:     ordID,
-			ProductID:   itm.ProductID,
-			Quantity:    itm.Quantity,
-			Price:       itm.Price,
+			OrderID:     orderID,
+			ProductID:   item.ProductID,
+			Quantity:    item.Quantity,
+			Price:       item.Price,
 			DateCreated: now,
 			DateUpdated: now,
 		}
 
-		orderAmount += itm.Price
+		orderAmount += item.Price
 	}
 
-	ord := Order{
-		ID:          ordID,
-		UserID:      input.UserID,
+	order := Order{
+		ID:          orderID,
+		UserID:      newOrder.UserID,
 		Amount:      orderAmount,
 		Status:      Statuses.Created,
 		DateCreated: now,
 		DateUpdated: now,
 	}
-	if err := b.storer.Create(ctx, ord); err != nil {
+	if err := b.storer.Create(ctx, order); err != nil {
 		return Order{}, fmt.Errorf("create: %w", err)
 	}
 
-	if err := b.storer.CreateOrderItems(ctx, ordItms); err != nil {
+	if err := b.storer.CreateOrderItems(ctx, orderItems); err != nil {
 		return Order{}, fmt.Errorf("create order items: %w", err)
 	}
 
-	return ord, nil
+	return order, nil
 }
