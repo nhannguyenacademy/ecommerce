@@ -70,6 +70,7 @@ func (b *Business) Delete(ctx context.Context, order Order) error {
 		return fmt.Errorf("delete order: %w", err)
 	}
 
+	// todo: using rabbitmq to publish event instead of directly delete order items
 	if err := b.storer.DeleteOrderItems(ctx, order); err != nil {
 		return fmt.Errorf("delete order items: %w", err)
 	}

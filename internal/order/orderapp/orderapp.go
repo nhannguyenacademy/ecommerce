@@ -291,7 +291,7 @@ func (a *app) updateStatusHandler(c *gin.Context) {
 		return
 	}
 
-	ord, err := a.orderBus.QueryByIDWithItems(ctx, orderID)
+	ord, err := a.orderBus.QueryByID(ctx, orderID)
 	if err != nil {
 		if errors.Is(err, orderbus.ErrNotFound) {
 			respond.Error(c, a.log, errs.Newf(errs.NotFound, "order orderID[%s] not found", orderID))
@@ -301,15 +301,15 @@ func (a *app) updateStatusHandler(c *gin.Context) {
 		return
 	}
 
-	updatedOrder, err := a.orderBus.UpdateStatus(ctx, ord.Order, status)
+	updatedOrder, err := a.orderBus.UpdateStatus(ctx, ord, status)
 	if err != nil {
 		respond.Error(c, a.log, errs.Newf(errs.Internal, "update order status: orderID[%s]: %s", orderID, err))
 		return
 	}
 
-	if updatedOrder.Status.Equal(orderbus.Statuses.Cancelled) {
-		// todo: revert product quantity (here or move to bus?)
-	}
+	//if updatedOrder.Status.Equal(orderbus.Statuses.Cancelled) {
+	// todo: revert product quantity (here or move to bus?)
+	//}
 
 	respond.Success(c, a.log, toAppOrder(updatedOrder))
 }
@@ -362,7 +362,7 @@ func (a *app) deleteHandler(c *gin.Context) {
 	}
 	// todo: check if order has any success payments, but orderbus cannot import paymentbus, use delegate instead
 
-	ord, err := a.orderBus.QueryByIDWithItems(ctx, orderID)
+	ord, err := a.orderBus.QueryByID(ctx, orderID)
 	if err != nil {
 		if errors.Is(err, orderbus.ErrNotFound) {
 			respond.Error(c, a.log, errs.Newf(errs.NotFound, "order orderID[%s] not found", orderID))
@@ -372,7 +372,7 @@ func (a *app) deleteHandler(c *gin.Context) {
 		return
 	}
 
-	if err := a.orderBus.Delete(ctx, ord.Order); err != nil {
+	if err := a.orderBus.Delete(ctx, ord); err != nil {
 		respond.Error(c, a.log, errs.Newf(errs.Internal, "delete: orderID[%s]: %s", orderID, err))
 		return
 	}

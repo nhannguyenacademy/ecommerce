@@ -1,4 +1,4 @@
-// Package sorting provides support for data sorting.
+// Package sort provides support for data sorting.
 package sort
 
 import (

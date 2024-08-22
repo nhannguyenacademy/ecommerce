@@ -109,7 +109,7 @@ type orderItem struct {
 	OrderID         string `json:"order_id"`
 	ProductID       string `json:"product_id"`
 	ProductName     string `json:"product_name"`
-	ProductImageUrl string `json:"product_image_url"`
+	ProductImageURL string `json:"product_image_url"`
 	Price           int64  `json:"price"`
 	Quantity        int32  `json:"quantity"`
 	DateCreated     string `json:"date_created"`
@@ -122,7 +122,7 @@ func toAppOrderItem(bus orderbus.OrderItem) orderItem {
 		OrderID:         bus.OrderID.String(),
 		ProductID:       bus.ProductID.String(),
 		ProductName:     bus.ProductName,
-		ProductImageUrl: bus.ProductImageURL.String(),
+		ProductImageURL: bus.ProductImageURL.String(),
 		Price:           bus.Price,
 		Quantity:        bus.Quantity,
 		DateCreated:     bus.DateCreated.Format(time.RFC3339),
