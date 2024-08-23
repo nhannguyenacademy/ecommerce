@@ -61,7 +61,8 @@ func (a *app) registerHandler(c *gin.Context) {
 		return
 	}
 
-	// todo: send email confirmation
+	// todo: send email confirmation, using queue
+	// todo: redesign email confirmation flow, db
 }
 
 func (a *app) loginHandler(c *gin.Context) {
