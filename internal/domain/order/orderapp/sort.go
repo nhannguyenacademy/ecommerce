@@ -1,8 +1,8 @@
 package orderapp
 
 import (
-	"github.com/nhannguyenacademy/ecommerce/internal/order/orderbus"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sort"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/order/orderbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sort"
 )
 
 var defaultSortBy = sort.NewBy("date_created", sort.ASC)

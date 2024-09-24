@@ -2,7 +2,7 @@ package productapp
 
 import (
 	"fmt"
-	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/product/productbus"
 	"strconv"
 	"time"
 )

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkapp/respond"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"runtime"
 )

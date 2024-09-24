@@ -10,8 +10,8 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userstore/userdb"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/user/userstore/userdb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"strings"
 )

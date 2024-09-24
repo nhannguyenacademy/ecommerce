@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkapp/errs"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"net/http"
 )

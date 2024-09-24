@@ -3,7 +3,7 @@ package query
 
 import (
 	"encoding/json"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/page"
 )
 
 // Result is the data model used when returning a query result.

@@ -3,9 +3,9 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userstore/userdb"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/user/userstore/userdb"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"net/mail"
 	"time"

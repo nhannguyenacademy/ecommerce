@@ -9,12 +9,12 @@ import (
 	"fmt"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jmoiron/sqlx"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sqldb"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 )
 
 var (

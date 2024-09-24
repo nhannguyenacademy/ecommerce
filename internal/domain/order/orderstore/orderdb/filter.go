@@ -2,7 +2,7 @@ package orderdb
 
 import (
 	"bytes"
-	"github.com/nhannguyenacademy/ecommerce/internal/order/orderbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/order/orderbus"
 	"strings"
 )
 

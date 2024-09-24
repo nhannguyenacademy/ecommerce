@@ -2,8 +2,8 @@ package productdb
 
 import (
 	"fmt"
-	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sort"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/product/productbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sort"
 )
 
 var sortByFields = map[string]string{

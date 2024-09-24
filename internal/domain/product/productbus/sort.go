@@ -1,6 +1,8 @@
 package productbus
 
-import "github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sort"
+import (
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sort"
+)
 
 // DefaultSortBy represents the default way we sort.
 var DefaultSortBy = sort.NewBy(SortByDateCreated, sort.DESC)

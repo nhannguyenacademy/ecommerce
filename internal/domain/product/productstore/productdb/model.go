@@ -3,7 +3,7 @@ package productdb
 import (
 	"database/sql"
 	"fmt"
-	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/product/productbus"
 	"net/url"
 	"time"
 

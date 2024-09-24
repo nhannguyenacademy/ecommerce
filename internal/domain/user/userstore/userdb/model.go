@@ -3,8 +3,8 @@ package userdb
 import (
 	"database/sql"
 	"fmt"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb/dbarray"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sqldb/dbarray"
 	"net/mail"
 	"time"
 

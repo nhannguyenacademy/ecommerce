@@ -2,8 +2,8 @@ package userapp
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/mid"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkapp/auth"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkapp/mid"
 )
 
 func (a *app) Routes(r gin.IRouter) {

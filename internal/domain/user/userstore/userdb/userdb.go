@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"net/mail"
 )

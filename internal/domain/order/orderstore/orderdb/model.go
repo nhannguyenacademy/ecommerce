@@ -3,7 +3,7 @@ package orderdb
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/nhannguyenacademy/ecommerce/internal/order/orderbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/order/orderbus"
 	"net/url"
 	"time"
 )

@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkapp/errs"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkapp/respond"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
 

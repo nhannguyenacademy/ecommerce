@@ -6,13 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/migrate"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/migrate"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/tools/admin/commands"
 	"io"
 	"os"
 
 	"github.com/ardanlabs/conf/v3"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
 

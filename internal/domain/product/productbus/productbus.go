@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sort"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/page"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sort"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 	"time"
 )

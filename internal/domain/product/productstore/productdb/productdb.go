@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/nhannguyenacademy/ecommerce/internal/product/productbus"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/page"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sort"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkbus/sqldb"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/product/productbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/page"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sort"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkbus/sqldb"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
 

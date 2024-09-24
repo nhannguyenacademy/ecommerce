@@ -3,9 +3,9 @@ package mid
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/auth"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/errs"
-	"github.com/nhannguyenacademy/ecommerce/internal/sdkapp/respond"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkapp/auth"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkapp/errs"
+	"github.com/nhannguyenacademy/ecommerce/internal/sdk/sdkapp/respond"
 	"github.com/nhannguyenacademy/ecommerce/pkg/logger"
 )
 

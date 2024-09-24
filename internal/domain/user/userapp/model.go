@@ -3,7 +3,7 @@ package userapp
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/nhannguyenacademy/ecommerce/internal/user/userbus"
+	"github.com/nhannguyenacademy/ecommerce/internal/domain/user/userbus"
 	"net/mail"
 	"time"
 )
