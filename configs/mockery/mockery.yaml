@@ -1,0 +1,17 @@
+packages:
+  github.com/nhannguyenacademy/ecommerce:
+    config:
+      all: true
+      with-expecter: true
+      recursive: true
+      dir: "{{.InterfaceDir}}/{{.PackageName}}mocks"
+      outpkg: "{{.PackageName}}mocks"
+      mockname: "Mock{{.InterfaceName}}"
+      filename: "mock_{{.InterfaceName}}_test.go"
+      exclude:
+        - "cmd"
+        - "internal/sdkapp"
+        - "internal/sdkbus"
+        - "pkg"
+        - "tools"
+        - "vendor"

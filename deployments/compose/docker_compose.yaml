@@ -1,0 +1,54 @@
+services:
+  database:
+    image: postgres:16.3
+    container_name: database
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - database_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s # Start period provides initialization time for containers that need time to bootstrap. Probe failure during that period will not be counted towards the maximum number of retries. However, if a health check succeeds during the start period, the container is considered started and all consecutive failures will be counted towards the maximum number of retries.
+    cpu_count: 2
+    networks:
+      - backend-network
+
+  init-migrate-seed:
+    image: local/nhannguyenacademy/ecommerce:1.0.0
+    pull_policy: never
+    container_name: init-migrate-seed
+    restart: no
+    entrypoint: ['./admin', 'migrate-seed']
+    networks:
+      - backend-network
+    depends_on:
+      database:
+        condition: service_healthy
+
+  ecommerce:
+    image: local/nhannguyenacademy/ecommerce:1.0.0
+    pull_policy: never
+    container_name: ecommerce
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - GOGC=off
+    networks:
+      - backend-network
+    depends_on:
+      init-migrate-seed:
+        condition: service_completed_successfully
+
+networks:
+  backend-network:
+    driver: bridge
+
+volumes:
+  database_data:

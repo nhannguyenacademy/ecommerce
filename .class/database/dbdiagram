@@ -1,0 +1,67 @@
+Table users {
+  user_id uuid [primary key]
+  name text [not null]
+  email text [not null, unique]
+  roles text[] [not null]
+  password_hash text [not null]
+  enabled boolean [not null]
+  email_confirm_token text [null, unique]
+  date_created timestamp [not null]
+  date_updated timestamp [not null]
+}
+
+Table products {
+  product_id uuid [primary key]
+  name text [not null]
+  description text [null]
+  imageURL text [null]
+  price bigint [not null]
+  quantity int [not null]
+  date_created timestamp [not null]
+  date_updated timestamp [not null]
+}
+
+Table orders {
+  order_id uuid [primary key]
+  user_id uuid [not null, ref: > users.user_id]
+  amount bigint [not null]
+  status text [not null]
+  date_created timestamp [not null]
+  date_updated timestamp [not null]
+}
+
+Table order_items {
+  order_item_id uuid [primary key]
+  order_id uuid [not null, ref: > orders.order_id]
+  product_id uuid [not null, ref: > products.product_id]
+  product_name text [not null]
+  product_image_url text [not null]
+  price bigint [not null]
+  quantity int [not null]
+  date_created timestamp [not null]
+  date_updated timestamp [not null]
+  Indexes {
+    product_id [name:"product_id_index"]
+    order_id [name:"order_id_index"]
+  }
+}
+
+
+Table payments {
+  payment_id uuid [primary key]
+  order_id uuid [not null, ref: > orders.order_id]
+  partner text [not null]
+  partner_order_id text [not null]
+  partner_transaction_id text [null, unique]
+  status text [not null]
+  currency text [not null]
+  date_created timestamp [not null]
+  date_updated timestamp [not null]
+
+  Indexes {
+    order_id [name:"order_id_index"]
+    partner_order_id [name:"partner_order_id_index"]
+    partner_transaction_id [name:"partner_transaction_id_index"]
+    (order_id, status) [name:"order_id_status_index"]
+  }
+}
