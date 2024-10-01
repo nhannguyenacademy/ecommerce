@@ -7,23 +7,19 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 #
 # 	Install Homebrew:
 #	$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-#
-# 	Install Homebrew's dependencies:
-#	$ sudo apt-get install build-essential
-#
-# 	Install GCC:
-#	$ brew install gcc
 
 # ==============================================================================
 # Install Tooling and Dependencies
 #
-#	This project uses Docker and it is expected to be installed. Please provide
-#	Docker at least 4 CPUs.
+#	This project uses Docker and it is expected to be installed. Please provide Docker at least 4 CPUs.
 #
 #	Run these commands to install everything needed.
 #	$ make dev-brew
 #	$ make dev-docker
 #	$ make dev-gotooling
+#
+# Add the following to your shell profile (e.g. ~/.bashrc, ~/.zshrc, ~/.profile, or ~/.bash_profile):
+# export PATH=$GOPATH/bin:$PATH
 
 # ==============================================================================
 # Running Test
@@ -119,9 +115,9 @@ compose-logs:
 # ==============================================================================
 # Run admin commands from local
 
-# example: make create-migration name=create_users_table
+# example: make create-migration name=create_table_users
 create-migration:
-	migrate create -ext sql -dir internal/sdkbus/migrate/migrations -seq $(name)
+	migrate create -ext sql -dir internal/sdk/sdkbus/migrate/migrations -seq $(name)
 
 migrate:
 	export ECOMMERCE_DB_HOST=localhost; go run tools/admin/main.go migrate

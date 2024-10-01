@@ -1,17 +1,19 @@
-package orderbus
+package paymentbus
 
 import "fmt"
 
 type statusSet struct {
-	Created   Status
-	Finished  Status
-	Cancelled Status
+	Created    Status
+	Processing Status
+	Success    Status
+	Failed     Status
 }
 
 var Statuses = statusSet{
-	Created:   newStatus("CREATED"),
-	Finished:  newStatus("FINISHED"),
-	Cancelled: newStatus("CANCELLED"),
+	Created:    newStatus("CREATED"),
+	Processing: newStatus("PROCESSING"),
+	Success:    newStatus("SUCCESS"),
+	Failed:     newStatus("FAILED"),
 }
 
 // =============================================================================

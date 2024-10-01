@@ -10,8 +10,8 @@ packages:
       filename: "mock_{{.InterfaceName}}_test.go"
       exclude:
         - "cmd"
-        - "internal/sdkapp"
-        - "internal/sdkbus"
+        - "internal/sdk/sdkapp"
+        - "internal/sdk/sdkbus"
         - "pkg"
         - "tools"
         - "vendor"
