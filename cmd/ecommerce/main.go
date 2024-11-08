@@ -27,10 +27,6 @@ import (
 	"time"
 )
 
-const (
-	apiV1GroupName = "api/v1"
-)
-
 var build = "develop"
 
 type config struct {
@@ -73,7 +69,6 @@ func main() {
 	traceIDFn := func(ctx context.Context) string {
 		return ""
 	}
-
 	log := logger.New(os.Stdout, logger.LevelInfo, "ecommerce", traceIDFn)
 
 	// -------------------------------------------------------------------------
@@ -95,9 +90,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 			Desc:  "Ecommerce",
 		},
 	}
-
-	const prefix = "ECOMMERCE"
-	help, err := conf.Parse(prefix, &cfg)
+	help, err := conf.Parse("ECOMMERCE", &cfg)
 	if err != nil {
 		if errors.Is(err, conf.ErrHelpWanted) {
 			fmt.Println(help)
@@ -107,10 +100,10 @@ func run(ctx context.Context, log *logger.Logger) error {
 	}
 
 	// -------------------------------------------------------------------------
-	// app Starting
+	// App starting
 
 	log.Info(ctx, "starting service", "version", cfg.Build)
-	defer log.Info(ctx, "shutdown complete")
+	defer log.Info(ctx, "shutdown completed")
 
 	out, err := conf.String(&cfg)
 	if err != nil {
@@ -121,7 +114,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// Database Support
 
-	log.Info(ctx, "startup", "status", "initializing database support", "hostport", cfg.DB.Host)
+	log.Info(ctx, "startup", "status", "initializing database support", "host", cfg.DB.Host)
 
 	db, err := sqldb.Open(sqldb.Config{
 		User:            cfg.DB.User,
@@ -163,7 +156,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// -------------------------------------------------------------------------
 	// Start API Service
 
-	log.Info(ctx, "startup", "status", "initializing V1 API support")
+	log.Info(ctx, "startup", "status", "initializing API server")
 
 	// Shutdown handling
 	shutdown := make(chan os.Signal, 1)
@@ -173,8 +166,8 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// todo: cors, tracing, metrics
 	gin.SetMode(gin.ReleaseMode)
 	ginEngine := gin.New()
-	apiV1Router := ginEngine.Group(apiV1GroupName)
-	apiV1Router.Use(mid.Logging(log, []string{}), mid.Panic(log))
+	ginEngine.Use(mid.Logging(log, []string{}), mid.Panic(log))
+	apiV1Router := ginEngine.Group("api/v1")
 	userapp.New(log, ath, cfg.Auth.ActiveKID, userBus).Routes(apiV1Router)
 	productapp.New(log, ath, productBus).Routes(apiV1Router)
 	orderapp.New(log, ath, sqldb.NewBeginner(db), orderBus, productBus, userBus).Routes(apiV1Router)
